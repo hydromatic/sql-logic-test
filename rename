@@ -1,0 +1,19 @@
+#!/bin/bash
+# Script to rename 'empty' to 'filtex'.
+# Change 'filtex' to your desired project name,
+# run this script,
+# then delete it.
+
+git ls-files |
+    grep -v checker.xml |
+    grep -v rename |
+    xargs sed -i '' -e 's/Empty/Filtex/g;s/empty/filtex/g'
+for f in $(git ls-files); do
+    g=$(echo $f | sed -e 's/Empty/Filtex/g;s/empty/filtex/g')
+    if [ "$f" != "$g" ]; then
+        mkdir -p $(dirname $g)
+        git mv $f $g
+    fi
+done
+
+# End rename
