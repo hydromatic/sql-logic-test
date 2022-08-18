@@ -269,13 +269,13 @@
       <property name="onCommentFormat"  value="CHECKSTYLE\: resume ([\w\|]+)"/>
       <property name="checkFormat"      value="$1"/>
     </module>
-    
+
     <!-- Turn off all checks between OFF and ON -->
     <module name="SuppressionCommentFilter">
       <property name="offCommentFormat" value="CHECKSTYLE\: OFF"/>
       <property name="onCommentFormat"  value="CHECKSTYLE\: ON"/>
     </module>
-    
+
     <!-- Turn off checks for the next N lines. -->
     <module name="SuppressWithNearbyCommentFilter">
       <property name="commentFormat" value="CHECKSTYLE: +IGNORE (\d+)"/>
