@@ -60,7 +60,7 @@
     <!-- Component and plugin versions, in alphabetical order. -->
     <build-helper-maven-plugin.version>3.3.0</build-helper-maven-plugin.version>
     <!-- We support checkstyle 9.3 and higher; 10.0 requires JDK 11 or higher. -->
-    <checkstyle.version>10.3.3</checkstyle.version>
+    <checkstyle.version>10.3.4</checkstyle.version>
     <git-commit-id-plugin.version>4.9.10</git-commit-id-plugin.version>
     <!-- We support Guava versions 19.0 and higher. -->
     <guava.version>31.1-jre</guava.version>
