@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.hydromatic.empty;
+package net.hydromatic.sqllogictest;
 
 import org.junit.jupiter.api.Test;
 
@@ -22,13 +22,13 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
- * Tests {@link Empty}.
+ * Tests {@link SqlLogicTest}.
  */
-public class EmptyTest {
+public class SqlLogicTestTest {
   @Test void testMain() {
-    Empty.main();
+    SqlLogicTest.main();
     assertThat(1, is(1));
   }
 }
 
-// End EmptyTest.java
+// End SqlLogicTestTest.java

@@ -7,15 +7,15 @@
     <version>0.1</version>
   </parent>
 
-  <artifactId>empty</artifactId>
+  <artifactId>sql-logic-test</artifactId>
   <version>0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <!-- More project information. -->
-  <name>Empty</name>
-  <description>Empty template for Java/Maven projects</description>
-  <url>https://github.com/julianhyde/empty</url>
-  <inceptionYear>2022</inceptionYear>
+  <name>SQL Logic Test</name>
+  <description>SQL Logic Test template for Java/Maven projects</description>
+  <url>https://github.com/hydromatic/sql-logic-test</url>
+  <inceptionYear>2023</inceptionYear>
   <organization>
     <name>Julian Hyde</name>
     <url>http://www.hydromatic.net</url>
@@ -80,21 +80,21 @@
   <!-- Environment settings. -->
   <distributionManagement>
     <site>
-      <id>empty.website</id>
-      <name>Empty Website</name>
-      <url>file:/home/jhyde/web/empty</url>
+      <id>sql-logic-test.website</id>
+      <name>SQL Logic Test Website</name>
+      <url>file:/home/jhyde/web/sql-logic-test</url>
     </site>
   </distributionManagement>
 
   <issueManagement>
     <system>github</system>
-    <url>https://github.com/julianhyde/empty/issues</url>
+    <url>https://github.com/hydromatic/sql-logic-test/issues</url>
   </issueManagement>
 
   <scm>
-    <connection>scm:git:git://github.com/julianhyde/empty.git</connection>
-    <developerConnection>scm:git:git@github.com:julianhyde/empty.git</developerConnection>
-    <url>https://github.com/julianhyde/empty/tree/main</url>
+    <connection>scm:git:git://github.com/hydromatic/sql-logic-test.git</connection>
+    <developerConnection>scm:git:git@github.com:hydromatic/sql-logic-test.git</developerConnection>
+    <url>https://github.com/hydromatic/sql-logic-test/tree/main</url>
     <tag>HEAD</tag>
   </scm>
 

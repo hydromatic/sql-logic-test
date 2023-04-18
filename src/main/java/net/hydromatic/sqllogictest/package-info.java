@@ -14,18 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.hydromatic.empty;
 
 /**
- * Empty main class.
+ * SQL Logic Test.
  */
-public class Empty {
-  private Empty() {
-  }
+package net.hydromatic.sqllogictest;
 
-  public static void main() {
-    System.out.println("Hello, world!");
-  }
-}
-
-// End Empty.java
+// End package-info.java

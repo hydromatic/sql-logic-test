@@ -19,7 +19,7 @@
 #
 # As a simple example, run this:
 #
-# ./empty --db foodmart jdbc:hsqldb:res:foodmart FOODMART FOODMART src/test/resources/hello.iq /tmp/hello.iq
+# ./slt --db foodmart jdbc:hsqldb:res:foodmart FOODMART FOODMART src/test/resources/hello.iq /tmp/hello.iq
 #
 # then look at /tmp/hello.iq.
 
@@ -41,6 +41,6 @@ if [ "$cygwin" ]; then
   CP=$(cygpath -wp "$CP")
 fi
 
-exec java $VM_OPTS -cp "${CP}" net.hydromatic.empty.Empty "$@"
+exec java $VM_OPTS -cp "${CP}" net.hydromatic.sqllogictest.SqlLogicTest "$@"
 
-# End empty
+# End slt
