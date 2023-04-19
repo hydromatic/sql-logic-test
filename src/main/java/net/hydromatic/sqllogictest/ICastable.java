@@ -1,5 +1,6 @@
 /*
  * Copyright 2022 VMware, Inc.
+ * SPDX-License-Identifier: MIT
  * SPDX-License-Identifier: Apache-2.0
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -23,21 +24,48 @@
  *
  */
 
-package org.apache.calcite.slt;
+package net.hydromatic.sqllogictest;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import javax.annotation.Nonnull;
-import javax.annotation.meta.TypeQualifierDefault;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
- * Applies the {@link Nonnull} annotation to every field unless overridden.
+ * Utility interface providing some useful casting methods.
  */
-@Documented
-@Nonnull
-@TypeQualifierDefault(ElementType.FIELD)
-@Retention(RetentionPolicy.RUNTIME)
-public @interface FieldsAreNonnullByDefault
-{}
+public interface ICastable {
+  @Nullable
+  default <T> T as(Class<T> clazz) {
+    return ICastable.as(this, clazz);
+  }
+
+  @Nullable
+  static <T> T as(Object obj, Class<T> clazz) {
+    try {
+      return clazz.cast(obj);
+    } catch (ClassCastException e) {
+      return null;
+    }
+  }
+
+  default void error(String message) {
+    System.err.println(message);
+  }
+
+  default <T> T as(Class<T> clazz, @Nullable String failureMessage) {
+    T result = this.as(clazz);
+    if (result == null) {
+      if (failureMessage == null)
+        failureMessage = this + "(" + this.getClass().getName() + ") is not an instance of " + clazz;
+      this.error(failureMessage);
+    }
+    assert result != null;
+    return result;
+  }
+
+  default <T> T to(Class<T> clazz) {
+    return this.as(clazz, (String) null);
+  }
+
+  default <T> boolean is(Class<T> clazz) {
+    return this.as(clazz) != null;
+  }
+}

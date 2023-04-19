@@ -22,19 +22,19 @@
  * SOFTWARE.
  */
 
-package org.apache.calcite.slt;
+package net.hydromatic.sqllogictest;
 
 import com.beust.jcommander.IParameterValidator;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 
-import org.apache.calcite.slt.executors.CalciteExecutor;
+import net.hydromatic.sqllogictest.executors.CalciteExecutor;
 
-import org.apache.calcite.slt.executors.JDBCExecutor;
-import org.apache.calcite.slt.executors.NoExecutor;
+import net.hydromatic.sqllogictest.executors.JdbcExecutor;
+import net.hydromatic.sqllogictest.executors.NoExecutor;
 
-import org.apache.calcite.slt.executors.SqlSLTTestExecutor;
+import net.hydromatic.sqllogictest.executors.SqlSltTestExecutor;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -112,14 +112,14 @@ public class ExecutionOptions {
     return "jdbc:hsqldb:mem:db";
   }
 
-  JDBCExecutor jdbcExecutor(HashSet<String> sltBugs) {
-    JDBCExecutor jdbc = new JDBCExecutor(this.jdbcConnectionString());
+  JdbcExecutor jdbcExecutor(HashSet<String> sltBugs) {
+    JdbcExecutor jdbc = new JdbcExecutor(this.jdbcConnectionString());
     jdbc.avoid(sltBugs);
     jdbc.setValidateStatus(this.validateStatus);
     return jdbc;
   }
 
-  SqlSLTTestExecutor getExecutor() throws IOException, SQLException {
+  SqlSltTestExecutor getExecutor() throws IOException, SQLException {
     HashSet<String> sltBugs = new HashSet<>();
     if (this.bugsFile != null) {
       sltBugs = this.readBugsFile(this.bugsFile);
@@ -132,7 +132,7 @@ public class ExecutionOptions {
       return this.jdbcExecutor(sltBugs);
     }
     case "calcite": {
-      JDBCExecutor jdbc = this.jdbcExecutor(sltBugs);
+      JdbcExecutor jdbc = this.jdbcExecutor(sltBugs);
       CalciteExecutor result = new CalciteExecutor(jdbc);
       result.avoid(sltBugs);
       result.setValidateStatus(this.validateStatus);

@@ -1,5 +1,6 @@
 /*
  * Copyright 2022 VMware, Inc.
+ * SPDX-License-Identifier: MIT
  * SPDX-License-Identifier: Apache-2.0
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -19,25 +20,27 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
- *
  */
 
-package org.apache.calcite.slt;
+package net.hydromatic.sqllogictest.executors;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import javax.annotation.Nonnull;
-import javax.annotation.meta.TypeQualifierDefault;
+import net.hydromatic.sqllogictest.ExecutionOptions;
+import net.hydromatic.sqllogictest.SltTestFile;
+import net.hydromatic.sqllogictest.TestStatistics;
 
 /**
- * Applies the {@link Nonnull} annotation to every method unless overridden.
+ * This executor does not execute the tests at all.
+ * It is still useful to validate that the test parsing works.
  */
-@Documented
-@Nonnull
-@TypeQualifierDefault(ElementType.METHOD)
-@Retention(RetentionPolicy.RUNTIME)
-public @interface MethodsAreNonnullByDefault
-{}
+public class NoExecutor extends SqlSltTestExecutor {
+  @Override
+  public TestStatistics execute(SltTestFile testFile, ExecutionOptions options) {
+    TestStatistics result = new TestStatistics(options.stopAtFirstError);
+    this.startTest();
+    result.setFailed(0);
+    result.setIgnored(testFile.getTestCount());
+    result.setPassed(0);
+    this.reportTime(testFile.getTestCount());
+    return result;
+  }
+}

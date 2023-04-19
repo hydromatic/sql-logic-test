@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package org.apache.calcite.slt;
+package net.hydromatic.sqllogictest;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.ArrayList;

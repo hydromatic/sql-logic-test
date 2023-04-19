@@ -24,11 +24,11 @@
  *
  */
 
-package org.apache.calcite.slt;
+package net.hydromatic.sqllogictest;
 
 import com.beust.jcommander.ParameterException;
 
-import org.apache.calcite.slt.executors.SqlSLTTestExecutor;
+import net.hydromatic.sqllogictest.executors.SqlSltTestExecutor;
 import org.apache.calcite.sql.parser.SqlParseException;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -69,7 +69,7 @@ public class Main {
 
     @Override
     public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
-      SqlSLTTestExecutor executor;
+      SqlSltTestExecutor executor;
       try {
         executor = this.options.getExecutor();
       } catch (IOException | SQLException e) {
@@ -78,10 +78,10 @@ public class Main {
       }
       String extension = Utilities.getFileExtension(file.toString());
       if (attrs.isRegularFile() && extension != null && extension.equals("test")) {
-        SLTTestFile test = null;
+        SltTestFile test = null;
         try {
           System.out.println("Running " + file);
-          test = new SLTTestFile(file.toString());
+          test = new SltTestFile(file.toString());
           test.parse();
         } catch (Exception ex) {
           System.err.println("Error while executing test " + file + ": " + ex.getMessage());

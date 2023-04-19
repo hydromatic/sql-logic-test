@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 VMware, Inc.
+ * Copyright 2022 VMware, Inc.
  * SPDX-License-Identifier: MIT
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -20,23 +20,48 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
+ *
  */
 
-package org.apache.calcite.slt.executors;
+package net.hydromatic.sqllogictest;
 
-import org.apache.calcite.slt.ExecutionOptions;
-import org.apache.calcite.slt.SLTTestFile;
-import org.apache.calcite.slt.TestStatistics;
-import org.apache.calcite.sql.parser.SqlParseException;
-
-import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
-import java.sql.SQLException;
-
-public abstract class SqlSLTTestExecutor extends SqlTestExecutor {
+public class SqlTestQuery implements ISqlTestOperation {
   /**
-   * Execute the specified test file.
+   * Query that is executed.
    */
-  public abstract TestStatistics execute(SLTTestFile testFile, ExecutionOptions options)
-      throws SqlParseException, IOException, SQLException, NoSuchAlgorithmException;
+  String query;
+  String name;
+  public final String file;
+  int line;
+
+  public final SqlTestQueryOutputDescription outputDescription;
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  SqlTestQuery(String file) {
+    this.query = "";
+    this.file = file;
+    this.outputDescription = new SqlTestQueryOutputDescription();
+  }
+
+  void setQuery(String query, int line) {
+    this.query = query;
+    this.line = line;
+  }
+
+  int getLine() {
+    return this.line;
+  }
+
+  public String getQuery() {
+    return this.query;
+  }
+
+  @Override
+  public String toString() {
+    return this.query;
+  }
 }

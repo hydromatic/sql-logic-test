@@ -22,25 +22,9 @@
  * SOFTWARE.
  */
 
-package org.apache.calcite.slt.executors;
-
-import org.apache.calcite.slt.ExecutionOptions;
-import org.apache.calcite.slt.SLTTestFile;
-import org.apache.calcite.slt.TestStatistics;
+package net.hydromatic.sqllogictest;
 
 /**
- * This executor does not execute the tests at all.
- * It is still useful to validate that the test parsing works.
+ * Base interface for SqlLogicTest operations: either statements or queries.
  */
-public class NoExecutor extends SqlSLTTestExecutor {
-  @Override
-  public TestStatistics execute(SLTTestFile testFile, ExecutionOptions options) {
-    TestStatistics result = new TestStatistics(options.stopAtFirstError);
-    this.startTest();
-    result.setFailed(0);
-    result.setIgnored(testFile.getTestCount());
-    result.setPassed(0);
-    this.reportTime(testFile.getTestCount());
-    return result;
-  }
-}
+public interface ISqlTestOperation extends ICastable { }

@@ -1,6 +1,5 @@
 /*
- * Copyright 2022 VMware, Inc.
- * SPDX-License-Identifier: MIT
+ * Copyright 2023 VMware, Inc.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -24,44 +23,16 @@
  *
  */
 
-package org.apache.calcite.slt;
+/**
+ * Package that doesn't allow null values as method parameters.
+ */
 
-public class SqlTestQuery implements ISqlTestOperation {
-  /**
-   * Query that is executed.
-   */
-  String query;
-  String name;
-  public final String file;
-  int line;
+@ParametersAreNonnullByDefault
+@FieldsAreNonnullByDefault
+@MethodsAreNonnullByDefault
+package net.hydromatic.sqllogictest.executors;
 
-  public final SqlTestQueryOutputDescription outputDescription;
+import net.hydromatic.sqllogictest.FieldsAreNonnullByDefault;
+import net.hydromatic.sqllogictest.MethodsAreNonnullByDefault;
 
-  public void setName(String name) {
-    this.name = name;
-  }
-
-  SqlTestQuery(String file) {
-    this.query = "";
-    this.file = file;
-    this.outputDescription = new SqlTestQueryOutputDescription();
-  }
-
-  void setQuery(String query, int line) {
-    this.query = query;
-    this.line = line;
-  }
-
-  int getLine() {
-    return this.line;
-  }
-
-  public String getQuery() {
-    return this.query;
-  }
-
-  @Override
-  public String toString() {
-    return this.query;
-  }
-}
+import javax.annotation.ParametersAreNonnullByDefault;
