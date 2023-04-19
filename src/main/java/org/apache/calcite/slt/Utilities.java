@@ -17,7 +17,7 @@
 
 package org.apache.calcite.slt;
 
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
@@ -32,8 +32,7 @@ public class Utilities {
     return "'" + other + "'";
   }
 
-  @Nullable
-  public static String getFileExtension(String filename) {
+  @Nullable public static String getFileExtension(String filename) {
     int i = filename.lastIndexOf('.');
     if (i > 0)
       return filename.substring(i+1);

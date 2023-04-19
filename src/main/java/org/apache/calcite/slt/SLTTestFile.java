@@ -33,7 +33,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Represents the data from a .test file from the
@@ -87,8 +87,7 @@ public class SLTTestFile {
   public final List<ISqlTestOperation> fileContents;
   private final BufferedReader reader;
   // To support undo for reading
-  @Nullable
-  private String nextLine;
+  private @Nullable String nextLine;
   private final String testFile;
   private boolean done;
   private int testCount;
@@ -149,8 +148,7 @@ public class SLTTestFile {
   /**
    * Parse a query that executes a SqlLogicTest test.
    */
-  @Nullable
-  private SqlTestQuery parseTestQuery() throws IOException {
+  private @Nullable SqlTestQuery parseTestQuery() throws IOException {
     @Nullable String line = this.nextLine(true);
     if (this.done)
       return null;

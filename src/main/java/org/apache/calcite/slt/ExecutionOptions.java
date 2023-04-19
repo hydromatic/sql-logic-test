@@ -45,7 +45,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 @SuppressWarnings("CanBeFinal")
 public class ExecutionOptions {
@@ -85,8 +85,7 @@ public class ExecutionOptions {
   @Parameter(names = "-s", description = "Ignore the status of SQL commands executed")
   boolean validateStatus;
   @Parameter(names = "-b", description = "Load a list of buggy commands to skip from this file")
-  @Nullable
-  String bugsFile = null;
+  @Nullable String bugsFile = null;
 
   /**
    * Read the list of statements and queries to skip from a file.

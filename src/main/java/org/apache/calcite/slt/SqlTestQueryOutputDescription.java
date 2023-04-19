@@ -26,7 +26,7 @@ package org.apache.calcite.slt;
 
 import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class SqlTestQueryOutputDescription {
   // These correspond directly to SLT strings.
@@ -40,16 +40,13 @@ public class SqlTestQueryOutputDescription {
   /**
    * Encoded types of columns expected in result.
    */
-  @Nullable
-  public String columnTypes;
-  @Nullable
-  public String hash;
+  public @Nullable String columnTypes;
+  public @Nullable String hash;
   /**
    * How results are sorted.
    */
   SortOrder order;
-  @Nullable
-  List<String> queryResults;
+  @Nullable List<String> queryResults;
 
   public SqlTestQueryOutputDescription() {
     this.columnTypes = null;
@@ -63,8 +60,7 @@ public class SqlTestQueryOutputDescription {
     return this.order;
   }
 
-  @Nullable
-  public List<String> getQueryResults() {
+  public @Nullable List<String> getQueryResults() {
     return this.queryResults;
   }
 
@@ -89,8 +85,7 @@ public class SqlTestQueryOutputDescription {
    * @param line A string that starts with the output type.
    * @return The tail of the string or null on error.
    */
-  @Nullable
-  String parseType(String line) {
+  @Nullable String parseType(String line) {
     int space = line.indexOf(" ");
     if (space < 0)
       throw new RuntimeException("No column types identified");
@@ -117,8 +112,7 @@ public class SqlTestQueryOutputDescription {
    * @return null on failure, the remaining string if the order is recognized.
    */
   @SuppressWarnings("SpellCheckingInspection")
-  @Nullable
-  String parseOrder(String orderDescription) {
+  @Nullable String parseOrder(String orderDescription) {
     if (orderDescription.startsWith("nosort")) {
       this.order = SortOrder.NONE;
       return orderDescription.substring("nosort" .length());
