@@ -35,14 +35,13 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.logging.Logger;
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 @SuppressWarnings({"SqlDialectInspection", "SqlNoDataSourceInspection"})
 public class JDBCExecutor extends SqlSLTTestExecutor {
   Logger logger = Logger.getLogger("JDBCExecutor");
   public final String dbUrl;
-  @Nullable
-  Connection connection;
+  @Nullable Connection connection;
 
   // In the end everything is decoded as a string
   static class Row {

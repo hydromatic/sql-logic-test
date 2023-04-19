@@ -26,19 +26,17 @@
 
 package org.apache.calcite.slt;
 
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Utility interface providing some useful casting methods.
  */
 public interface ICastable {
-  @Nullable
-  default <T> T as(Class<T> clazz) {
+  default <T> @Nullable T as(Class<T> clazz) {
     return ICastable.as(this, clazz);
   }
 
-  @Nullable
-  static <T> T as(Object obj, Class<T> clazz) {
+  static <T> @Nullable T as(Object obj, Class<T> clazz) {
     try {
       return clazz.cast(obj);
     } catch (ClassCastException e) {
