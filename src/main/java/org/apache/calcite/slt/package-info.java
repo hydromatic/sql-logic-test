@@ -1,5 +1,5 @@
 /*
- * Licensed to Julian Hyde under one or more
+ * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * The ASF licenses this file to you under the Apache License, Version 2.0
@@ -14,21 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package net.hydromatic.sqllogictest;
-
-import org.apache.calcite.slt.Main;
-
-import org.junit.jupiter.api.Test;
-
-import java.io.IOException;
 
 /**
- * Tests {@link SqlLogicTest}.
+ * Sql Logic Test tests.
  */
-public class SqlLogicTestTest {
-  @Test void testMain() throws IOException {
-    Main.main2(false, new String[] {"-h"});
-  }
-}
-
-// End SqlLogicTestTest.java
+package org.apache.calcite.slt;
