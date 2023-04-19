@@ -67,6 +67,7 @@
     <!-- We support Guava versions 19.0 and higher. -->
     <guava.version>31.1-jre</guava.version>
     <hamcrest.version>2.2</hamcrest.version>
+    <hsqldb.version>2.7.1</hsqldb.version>
     <jcommander.version>1.82</jcommander.version>
     <junit-jupiter.version>5.9.2</junit-jupiter.version>
     <maven-checkstyle-plugin.version>3.2.1</maven-checkstyle-plugin.version>
@@ -128,6 +129,14 @@
       <groupId>org.apache.calcite</groupId>
       <artifactId>calcite-core</artifactId>
       <version>${calcite.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.hsqldb</groupId>
+      <artifactId>hsqldb</artifactId>
+      <version>${hsqldb.version}</version>
+      <classifier>jdk8</classifier>
+      <scope>runtime</scope>
+      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>org.hamcrest</groupId>
@@ -297,6 +306,9 @@
                     <include>git.properties</include>
                   </includes>
                 </resource>
+                <resource>
+                  <directory>${project.basedir}/src/main/resources</directory>
+                </resource>
               </resources>
             </configuration>
           </execution>
@@ -359,6 +371,14 @@
         </includes>
       </resource>
     </resources>
+    <testResources>
+      <testResource>
+        <directory>${project.basedir}/src/test/resources</directory>
+      </testResource>
+      <testResource>
+        <directory>${project.basedir}/src/main/resources</directory>
+      </testResource>
+    </testResources>
   </build>
 
   <reporting>

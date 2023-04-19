@@ -27,6 +27,14 @@ public class SqlLogicTestTest {
   @Test void testMain() throws IOException {
     Main.main2(false, new String[] {"-h"});
   }
+
+  @Test void testRunSingleTestFile() throws IOException {
+    Main.main2(false, new String[] { "-e", "JDBC", "select1.test" });
+  }
+
+  @Test void testRunMultipleTestFiles() throws IOException {
+    Main.main2(false, new String[] { "-e", "JDBC", "select1.test", "select2.test" });
+  }
 }
 
 // End SqlLogicTestTest.java

@@ -32,10 +32,7 @@ import net.hydromatic.sqllogictest.executors.SqlSltTestExecutor;
 import org.apache.calcite.sql.parser.SqlParseException;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
@@ -45,14 +42,11 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 /**
  * Execute all SqlLogicTest tests.
  */
 public class Main {
-  static final String SLT_GIT = "https://github.com/gregrahn/sqllogictest/archive/refs/heads/master.zip";
 
   static class TestLoader extends SimpleFileVisitor<Path> {
     int errors = 0;
@@ -112,60 +106,6 @@ public class Main {
     return 1;
   }
 
-  @Nullable
-  static File newFile(File destinationDir, ZipEntry zipEntry) throws IOException {
-    String name = zipEntry.getName();
-    name = name.replace("sqllogictest-master/", "");
-    if (name.isEmpty())
-      return null;
-    File destFile = new File(destinationDir, name);
-    String destDirPath = destinationDir.getCanonicalPath();
-    String destFilePath = destFile.getCanonicalPath();
-    if (!destFilePath.startsWith(destDirPath + File.separator)) {
-      throw new IOException("Entry is outside of the target dir: " + name);
-    }
-    return destFile;
-  }
-
-  public static void install(File directory) throws IOException {
-    File zip = File.createTempFile("out", ".zip", new File("."));
-    System.out.println("Downloading SLT from " + SLT_GIT + " into " + zip.getAbsolutePath());
-    zip.deleteOnExit();
-    InputStream in = new URL(SLT_GIT).openStream();
-    Files.copy(in, zip.toPath(), StandardCopyOption.REPLACE_EXISTING);
-
-    System.out.println("Unzipping data");
-    try (ZipInputStream zis = new ZipInputStream(Files.newInputStream(zip.toPath()))) {
-      ZipEntry zipEntry = zis.getNextEntry();
-      while (zipEntry != null) {
-        File newFile = newFile(directory, zipEntry);
-        if (newFile != null) {
-          System.out.println("Creating " + newFile.getPath());
-          if (zipEntry.isDirectory()) {
-            if (!newFile.isDirectory() && !newFile.mkdirs()) {
-              throw new IOException("Failed to create directory " + newFile);
-            }
-          } else {
-            File parent = newFile.getParentFile();
-            if (!parent.isDirectory() && !parent.mkdirs()) {
-              throw new IOException("Failed to create directory " + parent);
-            }
-
-            try (FileOutputStream fos = new FileOutputStream(newFile)) {
-              int len;
-              byte[] buffer = new byte[1024];
-              while ((len = zis.read(buffer)) > 0) {
-                fos.write(buffer, 0, len);
-              }
-            }
-          }
-        }
-        zipEntry = zis.getNextEntry();
-      }
-      zis.closeEntry();
-    }
-  }
-
   @SuppressWarnings("java:S4792") // Log configuration is safe
   public static void main(String[] argv) throws IOException {
     main2(true, argv);
@@ -189,26 +129,11 @@ public class Main {
     }
     if (options.help)
       return abort(exit, options, null);
-    if (options.sltDirectory == null)
-      return abort(exit, options, "Please specify the directory with the SqlLogicTest suite using the -d flag");
-
-    File dir = new File(options.sltDirectory);
-    if (dir.exists()) {
-      if (!dir.isDirectory())
-        return abort(exit, options, options.sltDirectory + " is not a directory");
-      if (options.install)
-        System.err.println("Directory " + options.sltDirectory + " exists; skipping download");
-    } else {
-      if (options.install) {
-        install(dir);
-      } else {
-        return abort(exit, options, options.sltDirectory + " does not exist and no installation was specified");
-      }
-    }
 
     TestLoader loader = new TestLoader(options);
+    URL root = Thread.currentThread().getContextClassLoader().getResource("test");
     for (String file : options.getDirectories()) {
-      Path path = Paths.get(options.sltDirectory + "/test/" + file);
+      Path path = Paths.get(root.getPath(), file);
       Files.walkFileTree(path, loader);
     }
     System.out.println("Files that could not be not parsed: " + loader.errors);
