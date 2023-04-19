@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 VMware, Inc.
+ * Copyright 2022 VMware, Inc.
  * SPDX-License-Identifier: MIT
  * SPDX-License-Identifier: Apache-2.0
  *
@@ -22,21 +22,19 @@
  * SOFTWARE.
  */
 
-package org.apache.calcite.slt.executors;
+package net.hydromatic.sqllogictest;
 
-import org.apache.calcite.slt.ExecutionOptions;
-import org.apache.calcite.slt.SLTTestFile;
-import org.apache.calcite.slt.TestStatistics;
-import org.apache.calcite.sql.parser.SqlParseException;
+public class SltSqlStatement implements ISqlTestOperation {
+  public final String statement;
+  public final boolean shouldPass;
 
-import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
-import java.sql.SQLException;
+  public SltSqlStatement(String statement, boolean shouldPass) {
+    this.statement = statement;
+    this.shouldPass = shouldPass;
+  }
 
-public abstract class SqlSLTTestExecutor extends SqlTestExecutor {
-  /**
-   * Execute the specified test file.
-   */
-  public abstract TestStatistics execute(SLTTestFile testFile, ExecutionOptions options)
-      throws SqlParseException, IOException, SQLException, NoSuchAlgorithmException;
+  @Override
+  public String toString() {
+    return this.statement;
+  }
 }

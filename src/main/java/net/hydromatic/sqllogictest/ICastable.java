@@ -20,27 +20,50 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
+ *
  */
 
-package org.apache.calcite.slt.executors;
+package net.hydromatic.sqllogictest;
 
-import org.apache.calcite.slt.ExecutionOptions;
-import org.apache.calcite.slt.SLTTestFile;
-import org.apache.calcite.slt.TestStatistics;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
- * This executor does not execute the tests at all.
- * It is still useful to validate that the test parsing works.
+ * Utility interface providing some useful casting methods.
  */
-public class NoExecutor extends SqlSLTTestExecutor {
-  @Override
-  public TestStatistics execute(SLTTestFile testFile, ExecutionOptions options) {
-    TestStatistics result = new TestStatistics(options.stopAtFirstError);
-    this.startTest();
-    result.setFailed(0);
-    result.setIgnored(testFile.getTestCount());
-    result.setPassed(0);
-    this.reportTime(testFile.getTestCount());
+public interface ICastable {
+  default <T> @Nullable T as(Class<T> clazz) {
+    return ICastable.as(this, clazz);
+  }
+
+  static <T> @Nullable T as(Object obj, Class<T> clazz) {
+    try {
+      return clazz.cast(obj);
+    } catch (ClassCastException e) {
+      return null;
+    }
+  }
+
+  default void error(String message) {
+    System.err.println(message);
+  }
+
+  default <T> T as(Class<T> clazz, @Nullable String failureMessage) {
+    T result = this.as(clazz);
+    if (result == null) {
+      if (failureMessage == null)
+        failureMessage = this + "(" + this.getClass().getName() + ") is not an instance of " + clazz;
+      this.error(failureMessage);
+    }
+    assert result != null;
     return result;
+  }
+
+  default <T> T to(Class<T> clazz) {
+    return this.as(clazz, (String) null);
+  }
+
+  default <T> boolean is(Class<T> clazz) {
+    return this.as(clazz) != null;
   }
 }

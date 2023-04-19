@@ -22,9 +22,9 @@
  * SOFTWARE.
  */
 
-package org.apache.calcite.slt.executors;
+package net.hydromatic.sqllogictest.executors;
 
-import org.apache.calcite.slt.ICastable;
+import net.hydromatic.sqllogictest.ICastable;
 
 import java.text.DecimalFormat;
 import java.util.HashSet;

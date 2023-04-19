@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package org.apache.calcite.slt;
+package net.hydromatic.sqllogictest;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;

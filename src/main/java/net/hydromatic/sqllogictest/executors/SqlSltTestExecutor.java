@@ -22,38 +22,21 @@
  * SOFTWARE.
  */
 
-package org.apache.calcite.slt;
+package net.hydromatic.sqllogictest.executors;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
+import net.hydromatic.sqllogictest.ExecutionOptions;
+import net.hydromatic.sqllogictest.SltTestFile;
+import net.hydromatic.sqllogictest.TestStatistics;
+import org.apache.calcite.sql.parser.SqlParseException;
 
-/**
- * A PrintStream that writes do a String.
- */
-public class StringPrintStream {
-  PrintStream stream;
-  ByteArrayOutputStream byteStream;
-  boolean closed = false;
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+import java.sql.SQLException;
 
-  public StringPrintStream() throws UnsupportedEncodingException {
-    this.byteStream = new ByteArrayOutputStream();
-    this.stream = new PrintStream(this.byteStream, true, StandardCharsets.UTF_8.name());
-  }
-
-  public PrintStream getPrintStream() {
-    return this.stream;
-  }
-
+public abstract class SqlSltTestExecutor extends SqlTestExecutor {
   /**
-   * Get the data written so far.  Once this is done the stream is closed and can't be used anymore.
+   * Execute the specified test file.
    */
-  @Override
-  public String toString() {
-    if (!this.closed)
-      this.stream.close();
-    this.closed = true;
-    return this.byteStream.toString();
-  }
+  public abstract TestStatistics execute(SltTestFile testFile, ExecutionOptions options)
+      throws SqlParseException, IOException, SQLException, NoSuchAlgorithmException;
 }

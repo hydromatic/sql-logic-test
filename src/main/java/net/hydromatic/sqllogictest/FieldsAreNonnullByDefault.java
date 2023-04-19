@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 VMware, Inc.
+ * Copyright 2022 VMware, Inc.
  * SPDX-License-Identifier: Apache-2.0
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -23,16 +23,21 @@
  *
  */
 
+package net.hydromatic.sqllogictest;
+
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import javax.annotation.Nonnull;
+import javax.annotation.meta.TypeQualifierDefault;
+
 /**
- * Package that doesn't allow null values as method parameters.
+ * Applies the {@link Nonnull} annotation to every field unless overridden.
  */
-
-@ParametersAreNonnullByDefault
-@FieldsAreNonnullByDefault
-@MethodsAreNonnullByDefault
-package org.apache.calcite.slt.executors;
-
-import org.apache.calcite.slt.FieldsAreNonnullByDefault;
-import org.apache.calcite.slt.MethodsAreNonnullByDefault;
-
-import javax.annotation.ParametersAreNonnullByDefault;
+@Documented
+@Nonnull
+@TypeQualifierDefault(ElementType.FIELD)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface FieldsAreNonnullByDefault
+{}

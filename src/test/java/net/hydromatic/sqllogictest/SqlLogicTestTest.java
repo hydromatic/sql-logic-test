@@ -16,8 +16,6 @@
  */
 package net.hydromatic.sqllogictest;
 
-import org.apache.calcite.slt.Main;
-
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;

@@ -22,12 +22,19 @@
  * SOFTWARE.
  */
 
-package org.apache.calcite.slt.executors;
+package net.hydromatic.sqllogictest.executors;
 
 import org.apache.calcite.adapter.jdbc.JdbcSchema;
 import org.apache.calcite.jdbc.CalciteConnection;
 import org.apache.calcite.schema.SchemaPlus;
-import org.apache.calcite.slt.*;
+
+import net.hydromatic.sqllogictest.ExecutionOptions;
+import net.hydromatic.sqllogictest.ISqlTestOperation;
+import net.hydromatic.sqllogictest.SltSqlStatement;
+import net.hydromatic.sqllogictest.SltTestFile;
+import net.hydromatic.sqllogictest.SqlTestQuery;
+import net.hydromatic.sqllogictest.StringPrintStream;
+import net.hydromatic.sqllogictest.TestStatistics;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -36,12 +43,12 @@ import java.sql.*;
 import java.util.logging.Logger;
 import javax.sql.DataSource;
 
-public class CalciteExecutor extends SqlSLTTestExecutor {
+public class CalciteExecutor extends SqlSltTestExecutor {
   Logger logger = Logger.getLogger("CalciteExecutor");
-  private final JDBCExecutor statementExecutor;
+  private final JdbcExecutor statementExecutor;
   private final Connection connection;
 
-  public CalciteExecutor(JDBCExecutor statementExecutor) throws SQLException {
+  public CalciteExecutor(JdbcExecutor statementExecutor) throws SQLException {
     this.statementExecutor = statementExecutor;
     // Build our connection
     this.connection = DriverManager.getConnection(
@@ -60,7 +67,7 @@ public class CalciteExecutor extends SqlSLTTestExecutor {
     calciteConnection.setSchema(SCHEMA_NAME);
   }
 
-  boolean statement(SLTSqlStatement statement) throws SQLException {
+  boolean statement(SltSqlStatement statement) throws SQLException {
     this.statementExecutor.statement(statement);
     return true;
   }
@@ -84,7 +91,7 @@ public class CalciteExecutor extends SqlSLTTestExecutor {
   }
 
   @Override
-  public TestStatistics execute(SLTTestFile file, ExecutionOptions options)
+  public TestStatistics execute(SltTestFile file, ExecutionOptions options)
       throws IOException, SQLException {
     this.startTest();
     this.statementExecutor.establishConnection();
@@ -93,7 +100,7 @@ public class CalciteExecutor extends SqlSLTTestExecutor {
 
     TestStatistics result = new TestStatistics(options.stopAtFirstError);
     for (ISqlTestOperation operation : file.fileContents) {
-      SLTSqlStatement stat = operation.as(SLTSqlStatement.class);
+      SltSqlStatement stat = operation.as(SltSqlStatement.class);
       if (stat != null) {
         boolean status;
         try {
