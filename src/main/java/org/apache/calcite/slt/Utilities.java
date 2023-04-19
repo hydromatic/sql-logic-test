@@ -17,7 +17,7 @@
 
 package org.apache.calcite.slt;
 
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;

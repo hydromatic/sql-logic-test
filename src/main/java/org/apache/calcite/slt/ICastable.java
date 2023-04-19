@@ -26,7 +26,7 @@
 
 package org.apache.calcite.slt;
 
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Utility interface providing some useful casting methods.

@@ -31,7 +31,7 @@ import com.beust.jcommander.ParameterException;
 import org.apache.calcite.slt.executors.SqlSLTTestExecutor;
 import org.apache.calcite.sql.parser.SqlParseException;
 
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;

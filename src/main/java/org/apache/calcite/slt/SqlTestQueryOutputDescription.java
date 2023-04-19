@@ -26,7 +26,7 @@ package org.apache.calcite.slt;
 
 import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class SqlTestQueryOutputDescription {
   // These correspond directly to SLT strings.
