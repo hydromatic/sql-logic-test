@@ -24,7 +24,9 @@
  *
  */
 
-package org.apache.calcite.slt;
+package net.hydromatic.sqllogictest;
+
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -33,7 +35,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Represents the data from a .test file from the
@@ -64,8 +65,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  *         30 values hashing to 3c13dee48d9356ae19af2515e05e6b54
  *
  */
-public class SLTTestFile {
-  Logger logger = Logger.getLogger("SLTTestFile");
+public class SltTestFile {
+  Logger logger = Logger.getLogger("SltTestFile");
 
   /**
    * This policy accepts all SLT queries and statements written in the Postgres SQL language.
@@ -92,7 +93,7 @@ public class SLTTestFile {
   private boolean done;
   private int testCount;
 
-  public SLTTestFile(String testFile) throws IOException {
+  public SltTestFile(String testFile) throws IOException {
     File file = new File(testFile);
     this.reader = new BufferedReader(new FileReader(file));
     this.fileContents = new ArrayList<>();
@@ -260,7 +261,7 @@ public class SLTTestFile {
           line = this.nextLine(false);
         }
         String command = statement.toString();
-        SLTSqlStatement stat = new SLTSqlStatement(command, ok);
+        SltSqlStatement stat = new SltSqlStatement(command, ok);
         if (policy.accept(skip, only))
           this.add(stat);
       } else {

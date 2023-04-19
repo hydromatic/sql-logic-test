@@ -20,50 +20,11 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
- *
  */
 
-package org.apache.calcite.slt;
-
-import org.checkerframework.checker.nullness.qual.Nullable;
+package net.hydromatic.sqllogictest;
 
 /**
- * Utility interface providing some useful casting methods.
+ * Base interface for SqlLogicTest operations: either statements or queries.
  */
-public interface ICastable {
-  default <T> @Nullable T as(Class<T> clazz) {
-    return ICastable.as(this, clazz);
-  }
-
-  static <T> @Nullable T as(Object obj, Class<T> clazz) {
-    try {
-      return clazz.cast(obj);
-    } catch (ClassCastException e) {
-      return null;
-    }
-  }
-
-  default void error(String message) {
-    System.err.println(message);
-  }
-
-  default <T> T as(Class<T> clazz, @Nullable String failureMessage) {
-    T result = this.as(clazz);
-    if (result == null) {
-      if (failureMessage == null)
-        failureMessage = this + "(" + this.getClass().getName() + ") is not an instance of " + clazz;
-      this.error(failureMessage);
-    }
-    assert result != null;
-    return result;
-  }
-
-  default <T> T to(Class<T> clazz) {
-    return this.as(clazz, (String) null);
-  }
-
-  default <T> boolean is(Class<T> clazz) {
-    return this.as(clazz) != null;
-  }
-}
+public interface ISqlTestOperation extends ICastable { }

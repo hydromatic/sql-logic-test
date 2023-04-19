@@ -22,11 +22,17 @@
  * SOFTWARE.
  */
 
-package org.apache.calcite.slt.executors;
+package net.hydromatic.sqllogictest.executors;
 
-import org.apache.calcite.slt.*;
+import net.hydromatic.sqllogictest.ExecutionOptions;
+import net.hydromatic.sqllogictest.ISqlTestOperation;
+import net.hydromatic.sqllogictest.SltSqlStatement;
+import net.hydromatic.sqllogictest.SltTestFile;
+import net.hydromatic.sqllogictest.SqlTestQuery;
+import net.hydromatic.sqllogictest.SqlTestQueryOutputDescription;
+import net.hydromatic.sqllogictest.TestStatistics;
+import net.hydromatic.sqllogictest.Utilities;
 
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -38,8 +44,8 @@ import java.util.logging.Logger;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 @SuppressWarnings({"SqlDialectInspection", "SqlNoDataSourceInspection"})
-public class JDBCExecutor extends SqlSLTTestExecutor {
-  Logger logger = Logger.getLogger("JDBCExecutor");
+public class JdbcExecutor extends SqlSltTestExecutor {
+  Logger logger = Logger.getLogger("JdbcExecutor");
   public final String dbUrl;
   @Nullable Connection connection;
 
@@ -102,12 +108,12 @@ public class JDBCExecutor extends SqlSLTTestExecutor {
     }
   }
 
-  public JDBCExecutor(String dbUrl) {
+  public JdbcExecutor(String dbUrl) {
     this.dbUrl = dbUrl;
     this.connection = null;
   }
 
-  void statement(SLTSqlStatement statement) throws SQLException {
+  void statement(SltSqlStatement statement) throws SQLException {
     logger.info(() -> this.statementsExecuted + ": " + statement.statement);
     assert this.connection != null;
     try (Statement stmt = this.connection.createStatement()) {
@@ -319,7 +325,7 @@ public class JDBCExecutor extends SqlSLTTestExecutor {
   }
 
   @Override
-  public TestStatistics execute(SLTTestFile file, ExecutionOptions options)
+  public TestStatistics execute(SltTestFile file, ExecutionOptions options)
       throws SQLException, NoSuchAlgorithmException {
     this.startTest();
     this.establishConnection();
@@ -327,7 +333,7 @@ public class JDBCExecutor extends SqlSLTTestExecutor {
     TestStatistics result = new TestStatistics(options.stopAtFirstError);
     for (ISqlTestOperation operation : file.fileContents) {
       try {
-        SLTSqlStatement stat = operation.as(SLTSqlStatement.class);
+        SltSqlStatement stat = operation.as(SltSqlStatement.class);
         if (stat != null) {
           this.statement(stat);
         } else {

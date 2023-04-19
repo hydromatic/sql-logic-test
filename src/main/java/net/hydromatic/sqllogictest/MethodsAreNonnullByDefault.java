@@ -1,6 +1,5 @@
 /*
  * Copyright 2022 VMware, Inc.
- * SPDX-License-Identifier: MIT
  * SPDX-License-Identifier: Apache-2.0
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -20,21 +19,25 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
+ *
  */
 
-package org.apache.calcite.slt;
+package net.hydromatic.sqllogictest;
 
-public class SLTSqlStatement implements ISqlTestOperation {
-  public final String statement;
-  public final boolean shouldPass;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import javax.annotation.Nonnull;
+import javax.annotation.meta.TypeQualifierDefault;
 
-  public SLTSqlStatement(String statement, boolean shouldPass) {
-    this.statement = statement;
-    this.shouldPass = shouldPass;
-  }
-
-  @Override
-  public String toString() {
-    return this.statement;
-  }
-}
+/**
+ * Applies the {@link Nonnull} annotation to every method unless overridden.
+ */
+@Documented
+@Nonnull
+@TypeQualifierDefault(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface MethodsAreNonnullByDefault
+{}

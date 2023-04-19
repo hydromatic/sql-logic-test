@@ -1,5 +1,6 @@
 /*
  * Copyright 2022 VMware, Inc.
+ * SPDX-License-Identifier: MIT
  * SPDX-License-Identifier: Apache-2.0
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -23,21 +24,44 @@
  *
  */
 
-package org.apache.calcite.slt;
+package net.hydromatic.sqllogictest;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import javax.annotation.Nonnull;
-import javax.annotation.meta.TypeQualifierDefault;
+public class SqlTestQuery implements ISqlTestOperation {
+  /**
+   * Query that is executed.
+   */
+  String query;
+  String name;
+  public final String file;
+  int line;
 
-/**
- * Applies the {@link Nonnull} annotation to every field unless overridden.
- */
-@Documented
-@Nonnull
-@TypeQualifierDefault(ElementType.FIELD)
-@Retention(RetentionPolicy.RUNTIME)
-public @interface FieldsAreNonnullByDefault
-{}
+  public final SqlTestQueryOutputDescription outputDescription;
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  SqlTestQuery(String file) {
+    this.query = "";
+    this.file = file;
+    this.outputDescription = new SqlTestQueryOutputDescription();
+  }
+
+  void setQuery(String query, int line) {
+    this.query = query;
+    this.line = line;
+  }
+
+  int getLine() {
+    return this.line;
+  }
+
+  public String getQuery() {
+    return this.query;
+  }
+
+  @Override
+  public String toString() {
+    return this.query;
+  }
+}
