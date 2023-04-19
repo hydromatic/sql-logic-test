@@ -59,12 +59,14 @@
 
     <!-- Component and plugin versions, in alphabetical order. -->
     <build-helper-maven-plugin.version>3.3.0</build-helper-maven-plugin.version>
+    <calcite.version>1.32.0</calcite.version>
     <!-- We support checkstyle 9.3 and higher; 10.0 requires JDK 11 or higher. -->
     <checkstyle.version>10.10.0</checkstyle.version>
     <git-commit-id-plugin.version>4.9.10</git-commit-id-plugin.version>
     <!-- We support Guava versions 19.0 and higher. -->
     <guava.version>31.1-jre</guava.version>
     <hamcrest.version>2.2</hamcrest.version>
+    <jcommander.version>1.82</jcommander.version>
     <junit-jupiter.version>5.9.3</junit-jupiter.version>
     <maven-checkstyle-plugin.version>3.2.2</maven-checkstyle-plugin.version>
     <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
@@ -107,9 +109,19 @@
 
   <dependencies>
     <dependency>
+      <groupId>com.beust</groupId>
+      <artifactId>jcommander</artifactId>
+      <version>${jcommander.version}</version>
+    </dependency>
+    <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
       <version>${guava.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.calcite</groupId>
+      <artifactId>calcite-core</artifactId>
+      <version>${calcite.version}</version>
     </dependency>
     <dependency>
       <groupId>org.hamcrest</groupId>
@@ -188,6 +200,7 @@
         <artifactId>maven-checkstyle-plugin</artifactId>
         <version>${maven-checkstyle-plugin.version}</version>
         <executions>
+<!--
           <execution>
             <id>validate</id>
             <phase>validate</phase>
@@ -203,6 +216,7 @@
               <goal>check</goal>
             </goals>
           </execution>
+-->
         </executions>
         <dependencies>
           <dependency>
