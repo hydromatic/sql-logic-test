@@ -45,9 +45,16 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 
 @SuppressWarnings("CanBeFinal")
 public class ExecutionOptions {
+  /**
+   * Unique connection id for HSQLDB (allocate a different database for every
+   * connection).
+   */
+  private static final AtomicLong HSQLDB_CONNECTION_ID = new AtomicLong(0);
+
   public static class ExecutorValidator implements IParameterValidator {
     private final Set<String> legalExecutors;
 
@@ -70,13 +77,6 @@ public class ExecutionOptions {
 
   @Parameter(names = "-h", description = "Show this help message and exit")
   public boolean help = false;
-
-  @Parameter(names = "-i",
-      description = "Install the SLT tests if the directory does not exist")
-  public boolean install = false;
-
-  @Parameter(names = "-d", description = "Directory with SLT tests")
-  public String sltDirectory;
 
   @Parameter(names = "-x",
       description = "Stop at the first encountered query error")
@@ -126,7 +126,7 @@ public class ExecutionOptions {
   final JCommander commander;
 
   String jdbcConnectionString() {
-    return "jdbc:hsqldb:mem:db";
+    return "jdbc:hsqldb:mem:db" + HSQLDB_CONNECTION_ID.getAndIncrement();
   }
 
   JdbcExecutor jdbcExecutor(HashSet<String> sltBugs) {
@@ -181,8 +181,7 @@ public class ExecutionOptions {
 
   @Override public String toString() {
     return "ExecutionOptions{"
-        + "root=" + this.sltDirectory
-        + ", files=" + this.directories
+        + "tests=" + this.directories
         + ", execute=" + !this.doNotExecute
         + ", executor=" + this.executor
         + ", stopAtFirstError=" + this.stopAtFirstError

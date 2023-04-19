@@ -38,17 +38,52 @@ public class SqlLogicTestTest {
    * to {@link System#console()}.
    */
   @Test void testMain() throws IOException {
-    final ByteArrayOutputStream baosOut = new ByteArrayOutputStream();
-    final PrintStream out = new PrintStream(baosOut);
-    final ByteArrayOutputStream baosErr = new ByteArrayOutputStream();
-    final PrintStream err = new PrintStream(baosErr);
-    Main.main2(false, out, err, new String[] {"-h"});
-    out.flush();
-    err.flush();
-    assertThat(baosErr.toString(UTF_8), is(""));
-    assertThat(baosOut.toString(UTF_8),
-        is("ExecutionOptions{root=null, files=[], execute=true, "
+    Output res = launchSqlLogicTest("-h");
+    assertThat(res.err, is(""));
+    assertThat(res.out,
+        is("ExecutionOptions{tests=[], execute=true, "
             + "executor=calcite, stopAtFirstError=false}\n"));
+  }
+
+  @Test void testRunSingleTestFile() throws IOException {
+    Output res = launchSqlLogicTest("-e", "JDBC", "select1.test");
+    String[] outlines = res.out.split("\n");
+    assertThat(res.err, is(""));
+    assertThat(outlines[3], is("Passed: 1,000"));
+    assertThat(outlines[4], is("Failed: 0"));
+    assertThat(outlines[5], is("Ignored: 0"));
+  }
+
+  @Test void testRunMultipleTestFiles() throws IOException {
+    Output res =
+        launchSqlLogicTest("-e", "JDBC", "select1.test", "select2.test");
+    String[] outlines = res.out.split("\n");
+    assertThat(res.err, is(""));
+    assertThat(outlines[4], is("Passed: 2,000"));
+    assertThat(outlines[5], is("Failed: 0"));
+    assertThat(outlines[6], is("Ignored: 0"));
+  }
+
+  private static Output launchSqlLogicTest(String... args) throws IOException {
+    try (ByteArrayOutputStream bout = new ByteArrayOutputStream();
+        ByteArrayOutputStream berr = new ByteArrayOutputStream()) {
+      final PrintStream out = new PrintStream(bout);
+      final PrintStream err = new PrintStream(berr);
+      Main.main2(false, out, err, args);
+      out.flush();
+      err.flush();
+      return new Output(bout.toString(UTF_8), berr.toString(UTF_8));
+    }
+  }
+
+  private static class Output {
+    final String out;
+    final String err;
+
+    Output(String out, String err) {
+      this.out = out;
+      this.err = err;
+    }
   }
 }
 
