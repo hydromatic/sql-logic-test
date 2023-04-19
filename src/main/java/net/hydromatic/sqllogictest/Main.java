@@ -26,9 +26,9 @@ import net.hydromatic.sqllogictest.executors.HsqldbExecutor;
 import net.hydromatic.sqllogictest.executors.NoExecutor;
 import net.hydromatic.sqllogictest.executors.PostgresExecutor;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -57,33 +57,16 @@ public class Main {
     if (parse != 0) {
       return parse;
     }
-    if (options.directory == null || options.directory.isEmpty()) {
-      return options.abort(exit,
-          "Please specify the directory with the SqlLogicTest suite using the -d flag");
-    }
 
-    File dir = new File(options.directory);
-    if (dir.exists()) {
-      if (!dir.isDirectory()) {
-        return options.abort(exit, options.directory + " is not a directory");
-      }
-      if (options.install) {
-        err.println("Directory " + options.directory
-            + " exists; skipping download");
-      }
-    } else {
-      if (options.install) {
-        SltInstaller installer = new SltInstaller(dir);
-        installer.install();
-      } else {
-        return options.abort(exit, options.directory
-            + " does not exist and no installation was specified");
-      }
+    URL r = Thread.currentThread().getContextClassLoader().getResource("test");
+    if (r == null) {
+      out.println("Cannot find resources");
+      return 1;
     }
 
     TestLoader loader = new TestLoader(options);
     for (String file : options.getDirectories()) {
-      Path path = Paths.get(options.directory + "/test/" + file);
+      Path path = Paths.get(r.getPath(), file);
       Files.walkFileTree(path, loader);
     }
     out.println("Files that could not be not parsed: " + loader.errors);

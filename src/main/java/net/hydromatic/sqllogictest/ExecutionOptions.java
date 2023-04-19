@@ -163,14 +163,6 @@ public class ExecutionOptions {
     this.registerDefaultOptions();
   }
 
-  /**
-   * Install tests if they don't exist.
-   */
-  public boolean install = false;
-  /**
-   * Directory with tests.
-   */
-  public String directory = "";
   public boolean stopAtFirstError = false;
   public boolean doNotExecute = false;
   public String executor = "";
@@ -198,16 +190,6 @@ public class ExecutionOptions {
   void registerDefaultOptions() {
     this.registerOption("-h", null, "Show this help message and exit",
         o -> false);
-    this.registerOption("-d", "directory", "Directory with SLT tests",
-        o -> {
-          this.directory = o;
-          return true;
-        });
-    this.registerOption("-i", null,
-        "Install the SLT tests if the directory does not exist", o -> {
-          this.install = true;
-          return true;
-        });
     this.registerOption("-x", null, "Stop at the first encountered query error",
         o -> {
           this.stopAtFirstError = true;
@@ -382,6 +364,15 @@ public class ExecutionOptions {
     for (String e : this.executorFactories.keySet()) {
       out.println("\t" + e);
     }
+  }
+
+  @Override public String toString() {
+    return "ExecutionOptions{"
+        + "tests=" + this.directories
+        + ", execute=" + !this.doNotExecute
+        + ", executor=" + this.executor
+        + ", stopAtFirstError=" + this.stopAtFirstError
+        + '}';
   }
 
   /**

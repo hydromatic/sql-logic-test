@@ -32,11 +32,18 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * A test executor that uses HSQLDB through JDBC.
  */
 public class HsqldbExecutor extends JdbcExecutor {
+  /**
+   * Unique connection id for HSQLDB (allocate a different database for every
+   * connection).
+   */
+  private static final AtomicLong HSQLDB_CONNECTION_ID = new AtomicLong(0);
+
   public static class Factory extends ExecutorFactory {
     public static final HsqldbExecutor.Factory INSTANCE =
         new HsqldbExecutor.Factory();
@@ -58,7 +65,8 @@ public class HsqldbExecutor extends JdbcExecutor {
   }
 
   public HsqldbExecutor(ExecutionOptions options) {
-    super(options, "jdbc:hsqldb:mem:db", "", "");
+    super(options,
+        "jdbc:hsqldb:mem:db" + HSQLDB_CONNECTION_ID.getAndIncrement(), "", "");
   }
 
   @Override List<String> getTableList() throws SQLException {
