@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 VMware, Inc.
+ * Copyright 2022 VMware, Inc.
  * SPDX-License-Identifier: MIT
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -20,7 +20,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 package net.hydromatic.sqllogictest;
 
 import java.io.ByteArrayOutputStream;

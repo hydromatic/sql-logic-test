@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 VMware, Inc.
+ * Copyright xxxx VMware, Inc.
  * SPDX-License-Identifier: MIT
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -20,11 +20,3 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
-/**
- * Various Executor implementations.
- *
- * @see net.hydromatic.sqllogictest.executors.SqlTestExecutor
- */
-package net.hydromatic.sqllogictest.executors;
-
