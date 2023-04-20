@@ -58,7 +58,7 @@ import java.util.logging.Logger;
  * INSERT INTO t1(a,c,d,e,b) VALUES(107,106,108,109,105)
  *
  * query I nosort
- * SELECT CASE WHEN c>(SELECT avg(c) FROM t1) THEN a*2 ELSE b*10 END
+ * SELECT CASE WHEN c&gt;(SELECT avg(c) FROM t1) THEN a*2 ELSE b*10 END
  *   FROM t1
  *  ORDER BY 1
  * ----

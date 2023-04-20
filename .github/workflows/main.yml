@@ -29,17 +29,15 @@ jobs:
         javadoc: [ false ]
         site: [ false ]
         checkstyle-version: [ "" ]
-        guava-version: [ "" ]
         include:
             # Checkstyle 10 requires JDK 11 or higher, so downgrade to 9.3;
-            # also test lowest Guava version.
+            # disable javadoc in JDK 8 because it cannot read module files.
           - java-version: "8"
             checkstyle-version: "9.3"
-            guava-version: "19.0"
-            javadoc: true
           - java-version: "11"
-            guava-version: "23.0"
             site: true
+          - java-version: "17"
+            javadoc: true
 
     steps:
       - uses: actions/checkout@v2
@@ -65,10 +63,6 @@ jobs:
           if [ "${{ matrix.checkstyle-version }}" ]
           then
             DEFS="$DEFS -Dcheckstyle.version=${{ matrix.checkstyle-version }}"
-          fi
-          if [ "${{ matrix.guava-version }}" ]
-          then
-            DEFS="$DEFS -Dguava.version=${{ matrix.guava-version }}"
           fi
           ./mvnw $DEFS --batch-mode --update-snapshots $GOALS
 

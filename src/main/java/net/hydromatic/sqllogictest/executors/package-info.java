@@ -27,12 +27,4 @@
  * Package that doesn't allow null values as method parameters.
  */
 
-@ParametersAreNonnullByDefault
-@FieldsAreNonnullByDefault
-@MethodsAreNonnullByDefault
 package net.hydromatic.sqllogictest.executors;
-
-import net.hydromatic.sqllogictest.FieldsAreNonnullByDefault;
-import net.hydromatic.sqllogictest.MethodsAreNonnullByDefault;
-
-import javax.annotation.ParametersAreNonnullByDefault;
