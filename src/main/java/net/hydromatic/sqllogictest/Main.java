@@ -25,18 +25,24 @@
  */
 package net.hydromatic.sqllogictest;
 
+import net.hydromatic.sqllogictest.executors.SqlSltTestExecutor;
+
 import com.beust.jcommander.ParameterException;
 
-import net.hydromatic.sqllogictest.executors.SqlSltTestExecutor;
 import org.apache.calcite.sql.parser.SqlParseException;
-
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.nio.file.*;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
@@ -51,7 +57,11 @@ import java.util.zip.ZipInputStream;
  * Execute all SqlLogicTest tests.
  */
 public class Main {
-  static final String SLT_GIT = "https://github.com/gregrahn/sqllogictest/archive/refs/heads/master.zip";
+  private Main() {
+  }
+
+  static final String SLT_GIT =
+      "https://github.com/gregrahn/sqllogictest/archive/refs/heads/master.zip";
 
   static class TestLoader extends SimpleFileVisitor<Path> {
     int errors = 0;
@@ -59,15 +69,16 @@ public class Main {
     public final ExecutionOptions options;
 
     /**
-     * Creates a new class that reads tests from a directory tree and executes them.
+     * Creates a new class that reads tests from a directory tree and
+     * executes them.
      */
     TestLoader(ExecutionOptions options) {
       this.statistics = new TestStatistics(options.stopAtFirstError);
       this.options = options;
     }
 
-    @Override
-    public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
+    @Override public FileVisitResult visitFile(Path file,
+        BasicFileAttributes attrs) {
       SqlSltTestExecutor executor;
       try {
         executor = this.options.getExecutor();
@@ -76,22 +87,25 @@ public class Main {
         throw new RuntimeException(e);
       }
       String extension = Utilities.getFileExtension(file.toString());
-      if (attrs.isRegularFile() && extension != null && extension.equals("test")) {
+      if (attrs.isRegularFile()
+          && extension != null
+          && extension.equals("test")) {
         SltTestFile test = null;
         try {
           System.out.println("Running " + file);
           test = new SltTestFile(file.toString());
           test.parse();
         } catch (Exception ex) {
-          System.err.println("Error while executing test " + file + ": " + ex.getMessage());
+          System.err.println("Error while executing test " + file + ": "
+              + ex.getMessage());
           this.errors++;
         }
         if (test != null) {
           try {
             TestStatistics stats = executor.execute(test, options);
             this.statistics.add(stats);
-          } catch (SqlParseException | IOException |
-                   SQLException | NoSuchAlgorithmException ex) {
+          } catch (SqlParseException | IOException
+              | SQLException | NoSuchAlgorithmException ex) {
             // Can't add exceptions to the overridden method visitFile
             throw new IllegalArgumentException(ex);
           }
@@ -101,9 +115,11 @@ public class Main {
     }
   }
 
-  static int abort(boolean abort, ExecutionOptions options, @Nullable String message) {
-    if (message != null)
+  static int abort(boolean abort, ExecutionOptions options,
+      @Nullable String message) {
+    if (message != null) {
       System.err.println(message);
+    }
     options.usage();
     if (abort) {
       System.exit(1);
@@ -111,11 +127,13 @@ public class Main {
     return 1;
   }
 
-  static @Nullable File newFile(File destinationDir, ZipEntry zipEntry) throws IOException {
+  static @Nullable File newFile(File destinationDir, ZipEntry zipEntry)
+      throws IOException {
     String name = zipEntry.getName();
     name = name.replace("sqllogictest-master/", "");
-    if (name.isEmpty())
+    if (name.isEmpty()) {
       return null;
+    }
     File destFile = new File(destinationDir, name);
     String destDirPath = destinationDir.getCanonicalPath();
     String destFilePath = destFile.getCanonicalPath();
@@ -127,13 +145,15 @@ public class Main {
 
   public static void install(File directory) throws IOException {
     File zip = File.createTempFile("out", ".zip", new File("."));
-    System.out.println("Downloading SLT from " + SLT_GIT + " into " + zip.getAbsolutePath());
+    System.out.println("Downloading SLT from " + SLT_GIT + " into "
+        + zip.getAbsolutePath());
     zip.deleteOnExit();
     InputStream in = new URL(SLT_GIT).openStream();
     Files.copy(in, zip.toPath(), StandardCopyOption.REPLACE_EXISTING);
 
     System.out.println("Unzipping data");
-    try (ZipInputStream zis = new ZipInputStream(Files.newInputStream(zip.toPath()))) {
+    try (ZipInputStream zis =
+         new ZipInputStream(Files.newInputStream(zip.toPath()))) {
       ZipEntry zipEntry = zis.getNextEntry();
       while (zipEntry != null) {
         File newFile = newFile(directory, zipEntry);
@@ -185,22 +205,30 @@ public class Main {
     } catch (ParameterException ex) {
       return abort(exit, options, null);
     }
-    if (options.help)
+    if (options.help) {
       return abort(exit, options, null);
-    if (options.sltDirectory == null)
-      return abort(exit, options, "Please specify the directory with the SqlLogicTest suite using the -d flag");
+    }
+    if (options.sltDirectory == null) {
+      return abort(exit, options,
+          "Please specify the directory with the SqlLogicTest suite using the -d flag");
+    }
 
     File dir = new File(options.sltDirectory);
     if (dir.exists()) {
-      if (!dir.isDirectory())
-        return abort(exit, options, options.sltDirectory + " is not a directory");
-      if (options.install)
-        System.err.println("Directory " + options.sltDirectory + " exists; skipping download");
+      if (!dir.isDirectory()) {
+        return abort(exit, options,
+            options.sltDirectory + " is not a directory");
+      }
+      if (options.install) {
+        System.err.println("Directory " + options.sltDirectory
+            + " exists; skipping download");
+      }
     } else {
       if (options.install) {
         install(dir);
       } else {
-        return abort(exit, options, options.sltDirectory + " does not exist and no installation was specified");
+        return abort(exit, options, options.sltDirectory
+            + " does not exist and no installation was specified");
       }
     }
 

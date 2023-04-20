@@ -24,10 +24,6 @@
 
 package net.hydromatic.sqllogictest.executors;
 
-import org.apache.calcite.adapter.jdbc.JdbcSchema;
-import org.apache.calcite.jdbc.CalciteConnection;
-import org.apache.calcite.schema.SchemaPlus;
-
 import net.hydromatic.sqllogictest.ExecutionOptions;
 import net.hydromatic.sqllogictest.ISqlTestOperation;
 import net.hydromatic.sqllogictest.SltSqlStatement;
@@ -36,14 +32,24 @@ import net.hydromatic.sqllogictest.SqlTestQuery;
 import net.hydromatic.sqllogictest.StringPrintStream;
 import net.hydromatic.sqllogictest.TestStatistics;
 
+import org.apache.calcite.adapter.jdbc.JdbcSchema;
+import org.apache.calcite.jdbc.CalciteConnection;
+import org.apache.calcite.schema.SchemaPlus;
+
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.logging.Logger;
 import javax.sql.DataSource;
 
 public class CalciteExecutor extends SqlSltTestExecutor {
+  private static final String SCHEMA_NAME = "SLT";
+
   Logger logger = Logger.getLogger("CalciteExecutor");
   private final JdbcExecutor statementExecutor;
   private final Connection connection;
@@ -53,16 +59,14 @@ public class CalciteExecutor extends SqlSltTestExecutor {
     // Build our connection
     this.connection = DriverManager.getConnection(
         "jdbc:calcite:lex=ORACLE");
-    CalciteConnection calciteConnection = this.connection.unwrap(CalciteConnection.class);
+    CalciteConnection calciteConnection =
+        this.connection.unwrap(CalciteConnection.class);
     SchemaPlus rootSchema = calciteConnection.getRootSchema();
-    DataSource hsqldb = JdbcSchema.dataSource(
-        "jdbc:hsqldb:mem:db",
-        "org.hsqldb.jdbcDriver",
-        "",
-        ""
-    );
-    final String SCHEMA_NAME = "SLT";
-    JdbcSchema jdbcSchema = JdbcSchema.create(rootSchema, SCHEMA_NAME, hsqldb, null, null);
+    DataSource hsqldb =
+        JdbcSchema.dataSource("jdbc:hsqldb:mem:db", "org.hsqldb.jdbcDriver",
+            "", "");
+    JdbcSchema jdbcSchema =
+        JdbcSchema.create(rootSchema, SCHEMA_NAME, hsqldb, null, null);
     rootSchema.add(SCHEMA_NAME, jdbcSchema);
     calciteConnection.setSchema(SCHEMA_NAME);
   }
@@ -72,13 +76,15 @@ public class CalciteExecutor extends SqlSltTestExecutor {
     return true;
   }
 
-  void query(SqlTestQuery query, TestStatistics statistics) throws UnsupportedEncodingException {
+  void query(SqlTestQuery query, TestStatistics statistics)
+      throws UnsupportedEncodingException {
     String q = query.getQuery();
     logger.info(() -> "Executing query " + q);
     try (PreparedStatement ps = this.connection.prepareStatement(q)) {
       ps.execute();
       try (ResultSet resultSet = ps.getResultSet()) {
-        this.statementExecutor.validate(query, resultSet, query.outputDescription, statistics);
+        this.statementExecutor.validate(query, resultSet,
+            query.outputDescription, statistics);
       } catch (NoSuchAlgorithmException e) {
         throw new RuntimeException(e);
       }
@@ -90,9 +96,8 @@ public class CalciteExecutor extends SqlSltTestExecutor {
     }
   }
 
-  @Override
-  public TestStatistics execute(SltTestFile file, ExecutionOptions options)
-      throws IOException, SQLException {
+  @Override public TestStatistics execute(SltTestFile file,
+      ExecutionOptions options) throws IOException, SQLException {
     this.startTest();
     this.statementExecutor.establishConnection();
     this.statementExecutor.dropAllViews();
@@ -115,9 +120,12 @@ public class CalciteExecutor extends SqlSltTestExecutor {
           status = false;
         }
         this.statementsExecuted++;
-        if (this.validateStatus &&
-            status != stat.shouldPass)
-          throw new RuntimeException("Statement " + stat.statement + " status " + status + " expected " + stat.shouldPass);
+        if (this.validateStatus
+            && status != stat.shouldPass) {
+          throw new RuntimeException("Statement " + stat.statement
+              + " status " + status
+              + " expected " + stat.shouldPass);
+        }
       } else {
         SqlTestQuery query = operation.to(SqlTestQuery.class);
         if (this.buggyOperations.contains(query.getQuery())) {

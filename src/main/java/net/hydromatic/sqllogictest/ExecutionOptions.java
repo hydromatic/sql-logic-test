@@ -24,17 +24,17 @@
 
 package net.hydromatic.sqllogictest;
 
+import net.hydromatic.sqllogictest.executors.CalciteExecutor;
+import net.hydromatic.sqllogictest.executors.JdbcExecutor;
+import net.hydromatic.sqllogictest.executors.NoExecutor;
+import net.hydromatic.sqllogictest.executors.SqlSltTestExecutor;
+
 import com.beust.jcommander.IParameterValidator;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 
-import net.hydromatic.sqllogictest.executors.CalciteExecutor;
-
-import net.hydromatic.sqllogictest.executors.JdbcExecutor;
-import net.hydromatic.sqllogictest.executors.NoExecutor;
-
-import net.hydromatic.sqllogictest.executors.SqlSltTestExecutor;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -45,7 +45,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 @SuppressWarnings("CanBeFinal")
 public class ExecutionOptions {
@@ -59,10 +58,11 @@ public class ExecutionOptions {
       this.legalExecutors.add("calcite");
     }
 
-    @Override
-    public void validate(String name, String value) throws ParameterException {
-      if (this.legalExecutors.contains(value))
+    @Override public void validate(String name, String value)
+        throws ParameterException {
+      if (this.legalExecutors.contains(value)) {
         return;
+      }
       throw new ParameterException("Illegal executor name " + value + "\n"
           + "Legal values are: " + this.legalExecutors);
     }
@@ -70,21 +70,36 @@ public class ExecutionOptions {
 
   @Parameter(names = "-h", description = "Show this help message and exit")
   public boolean help = false;
-  @Parameter(names = "-i", description = "Install the SLT tests if the directory does not exist")
+
+  @Parameter(names = "-i",
+      description = "Install the SLT tests if the directory does not exist")
   public boolean install = false;
+
   @Parameter(names = "-d", description = "Directory with SLT tests")
   public String sltDirectory;
-  @Parameter(names = "-x", description = "Stop at the first encountered query error")
+
+  @Parameter(names = "-x",
+      description = "Stop at the first encountered query error")
   public boolean stopAtFirstError = false;
-  @Parameter(description = "Files or directories with test data (relative to the specified directory)")
+
+  @Parameter(description =
+      "Files or directories with test data (relative to the specified directory)")
   List<String> directories = new ArrayList<>();
-  @Parameter(names = "-n", description = "Do not execute, just parse the test files")
+
+  @Parameter(names = "-n",
+      description = "Do not execute, just parse the test files")
   boolean doNotExecute;
-  @Parameter(names = "-e", description = "Executor to use; one of 'none, JDBC, calcite'", validateWith = ExecutorValidator.class)
+  @Parameter(names = "-e",
+      description = "Executor to use; one of 'none, JDBC, calcite'",
+      validateWith = ExecutorValidator.class)
   String executor = "calcite";
-  @Parameter(names = "-s", description = "Ignore the status of SQL commands executed")
+
+  @Parameter(names = "-s",
+      description = "Ignore the status of SQL commands executed")
   boolean validateStatus;
-  @Parameter(names = "-b", description = "Load a list of buggy commands to skip from this file")
+
+  @Parameter(names = "-b",
+      description = "Load a list of buggy commands to skip from this file")
   @Nullable String bugsFile = null;
 
   /**
@@ -96,9 +111,12 @@ public class ExecutionOptions {
     try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
       while (true) {
         String line = reader.readLine();
-        if (line == null) break;
-        if (line.startsWith("//"))
+        if (line == null) {
+          break;
+        }
+        if (line.startsWith("//")) {
           continue;
+        }
         bugs.add(line);
       }
     }
@@ -138,9 +156,8 @@ public class ExecutionOptions {
       return result;
     }
     default:
-      break;
+      throw new RuntimeException("Unknown executor: " + this.executor);
     }
-    throw new RuntimeException("Unknown executor: " + this.executor);  // unreachable
   }
 
   public List<String> getDirectories() {
@@ -148,10 +165,10 @@ public class ExecutionOptions {
   }
 
   public ExecutionOptions() {
-      this.commander = JCommander.newBuilder()
-          .addObject(this)
-          .build();
-      this.commander.setProgramName("slt");
+    this.commander = JCommander.newBuilder()
+        .addObject(this)
+        .build();
+    this.commander.setProgramName("slt");
   }
 
   public void usage() {
@@ -162,14 +179,13 @@ public class ExecutionOptions {
     this.commander.parse(argv);
   }
 
-  @Override
-  public String toString() {
-    return "ExecutionOptions{" +
-        "root=" + this.sltDirectory +
-        ", files=" + this.directories +
-        ", execute=" + !this.doNotExecute +
-        ", executor=" + this.executor +
-        ", stopAtFirstError=" + this.stopAtFirstError +
-        '}';
+  @Override public String toString() {
+    return "ExecutionOptions{"
+        + "root=" + this.sltDirectory
+        + ", files=" + this.directories
+        + ", execute=" + !this.doNotExecute
+        + ", executor=" + this.executor
+        + ", stopAtFirstError=" + this.stopAtFirstError
+        + '}';
   }
 }

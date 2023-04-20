@@ -60,8 +60,7 @@ public class SqlTestQuery implements ISqlTestOperation {
     return this.query;
   }
 
-  @Override
-  public String toString() {
+  @Override public String toString() {
     return this.query;
   }
 }
