@@ -24,9 +24,10 @@
 
 package net.hydromatic.sqllogictest;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.util.ArrayList;
 import java.util.List;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class SqlTestQueryOutputDescription {
   // These correspond directly to SLT strings.
@@ -73,8 +74,9 @@ public class SqlTestQueryOutputDescription {
   }
 
   public void addResultLine(String line) {
-    if (this.queryResults == null)
+    if (this.queryResults == null) {
       throw new RuntimeException("queryResults were not initialized");
+    }
     this.queryResults.add(line);
     this.valueCount++;
   }
@@ -87,8 +89,9 @@ public class SqlTestQueryOutputDescription {
    */
   @Nullable String parseType(String line) {
     int space = line.indexOf(" ");
-    if (space < 0)
+    if (space < 0) {
       throw new RuntimeException("No column types identified");
+    }
     this.columnTypes = line.substring(0, space).trim();
     for (int i = 0; i < this.columnTypes.length(); i++) {
       // Type of result encoded as characters.
@@ -138,8 +141,9 @@ public class SqlTestQueryOutputDescription {
    * Return -1 if the output size is not known.
    */
   public int getExpectedOutputSize() {
-    if (this.columnTypes == null || this.valueCount < 0)
+    if (this.columnTypes == null || this.valueCount < 0) {
       return -1;
+    }
     return this.valueCount / this.columnTypes.length();
   }
 }

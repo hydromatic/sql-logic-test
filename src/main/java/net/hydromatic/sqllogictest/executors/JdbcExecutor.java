@@ -33,15 +33,22 @@ import net.hydromatic.sqllogictest.SqlTestQueryOutputDescription;
 import net.hydromatic.sqllogictest.TestStatistics;
 import net.hydromatic.sqllogictest.Utilities;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLDataException;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.logging.Logger;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 @SuppressWarnings({"SqlDialectInspection", "SqlNoDataSourceInspection"})
 public class JdbcExecutor extends SqlSltTestExecutor {
@@ -61,8 +68,7 @@ public class JdbcExecutor extends SqlSltTestExecutor {
       this.values.add(v);
     }
 
-    @Override
-    public String toString() {
+    @Override public String toString() {
       return String.join("\n", this.values);
     }
   }
@@ -78,8 +84,7 @@ public class JdbcExecutor extends SqlSltTestExecutor {
       this.allRows.add(row);
     }
 
-    @Override
-    public String toString() {
+    @Override public String toString() {
       return String.join("\n", Utilities.map(this.allRows, Row::toString));
     }
 
@@ -127,7 +132,8 @@ public class JdbcExecutor extends SqlSltTestExecutor {
     this.statementsExecuted++;
   }
 
-  void query(SqlTestQuery query, TestStatistics statistics) throws SQLException, NoSuchAlgorithmException {
+  void query(SqlTestQuery query, TestStatistics statistics)
+      throws SQLException, NoSuchAlgorithmException {
     assert this.connection != null;
     if (this.buggyOperations.contains(query.getQuery())) {
       logger.warning(() -> "Skipping " + query.getQuery());
@@ -149,18 +155,20 @@ public class JdbcExecutor extends SqlSltTestExecutor {
       switch (c) {
       case 'R':
         double d = rs.getDouble(i);
-        if (rs.wasNull())
+        if (rs.wasNull()) {
           row.add("NULL");
-        else
+        } else {
           row.add(String.format("%.3f", d));
+        }
         break;
       case 'I':
         try {
           long integer = rs.getLong(i);
-          if (rs.wasNull())
+          if (rs.wasNull()) {
             row.add("NULL");
-          else
+          } else {
             row.add(String.format("%d", integer));
+          }
         } catch (SQLDataException | NumberFormatException ignore) {
           // This probably indicates a bug in the query, since
           // the query expects an integer, but the result cannot
@@ -171,14 +179,15 @@ public class JdbcExecutor extends SqlSltTestExecutor {
         break;
       case 'T':
         String s = rs.getString(i);
-        if (s == null)
+        if (s == null) {
           row.add("NULL");
-        else {
+        } else {
           StringBuilder result = new StringBuilder();
           for (int j = 0; j < s.length(); j++) {
             char sc = s.charAt(j);
-            if (sc < ' ' || sc > '~')
+            if (sc < ' ' || sc > '~') {
               sc = '@';
+            }
             result.append(sc);
           }
           row.add(result.toString());
@@ -192,14 +201,15 @@ public class JdbcExecutor extends SqlSltTestExecutor {
   }
 
   static class RowComparator implements Comparator<Row> {
-    @Override
-    public int compare(Row o1, Row o2) {
-      if (o1.values.size() != o2.values.size())
+    @Override public int compare(Row o1, Row o2) {
+      if (o1.values.size() != o2.values.size()) {
         throw new RuntimeException("Comparing rows of different lengths");
+      }
       for (int i = 0; i < o1.values.size(); i++) {
         int r = o1.values.get(i).compareTo(o2.values.get(i));
-        if (r != 0)
+        if (r != 0) {
           return r;
+        }
       }
       return 0;
     }
@@ -216,10 +226,12 @@ public class JdbcExecutor extends SqlSltTestExecutor {
       Row row = this.getValue(rs, description.columnTypes);
       rows.add(row);
     }
-    if (description.getValueCount() != rows.size() * description.columnTypes.length()) {
-      statistics.addFailure(new TestStatistics.FailedTestDescription(
-          query, "Expected " + description.getValueCount() + " rows, got " +
-          rows.size() * description.columnTypes.length()));
+    if (description.getValueCount()
+        != rows.size() * description.columnTypes.length()) {
+      statistics.addFailure(
+          new TestStatistics.FailedTestDescription(query,
+              "Expected " + description.getValueCount() + " rows, got "
+                  + rows.size() * description.columnTypes.length()));
       return;
     }
     rows.sort(description.getOrder());
@@ -256,9 +268,10 @@ public class JdbcExecutor extends SqlSltTestExecutor {
     ResultSet rs = md.getTables(null, null, "%", new String[]{"TABLE"});
     while (rs.next()) {
       String tableName = rs.getString(3);
-      if (tableName.equals("PUBLIC"))
+      if (tableName.equals("PUBLIC")) {
         // The catalog table in HSQLDB
         continue;
+      }
       result.add(tableName);
     }
     rs.close();
@@ -282,8 +295,9 @@ public class JdbcExecutor extends SqlSltTestExecutor {
     assert this.connection != null;
     List<String> tables = this.getTableList();
     for (String tableName : tables) {
-      // Unfortunately prepare statements cannot be parameterized in table names.
-      // Sonar complains about this, but there is nothing we can do but suppress the warning.
+      // Unfortunately prepare statements cannot be parameterized in
+      // table names.  Sonar complains about this, but there is
+      // nothing we can do but suppress the warning.
       String del = "DROP TABLE " + tableName;
       logger.info(del);
       try (Statement drop = this.connection.createStatement()) {
@@ -296,8 +310,9 @@ public class JdbcExecutor extends SqlSltTestExecutor {
     assert this.connection != null;
     List<String> tables = this.getViewList();
     for (String tableName : tables) {
-      // Unfortunately prepare statements cannot be parameterized in table names.
-      // Sonar complains about this, but there is nothing we can do but suppress the warning.
+      // Unfortunately prepare statements cannot be parameterized in
+      // table names.  Sonar complains about this, but there is
+      // nothing we can do but suppress the warning.
       String del = "DROP VIEW IF EXISTS " + tableName + " CASCADE";
       logger.info(del);
       try (Statement drop = this.connection.createStatement()) {
@@ -324,9 +339,8 @@ public class JdbcExecutor extends SqlSltTestExecutor {
     this.connection.close();
   }
 
-  @Override
-  public TestStatistics execute(SltTestFile file, ExecutionOptions options)
-      throws SQLException, NoSuchAlgorithmException {
+  @Override public TestStatistics execute(SltTestFile file,
+      ExecutionOptions options) throws SQLException, NoSuchAlgorithmException {
     this.startTest();
     this.establishConnection();
     this.dropAllTables();
@@ -341,7 +355,8 @@ public class JdbcExecutor extends SqlSltTestExecutor {
           this.query(query, result);
         }
       } catch (SQLException ex) {
-        System.err.println("Error while processing #" + result.testsRun() + " " + operation);
+        System.err.println("Error while processing #" + result.testsRun()
+            + " " + operation);
         throw ex;
       }
     }

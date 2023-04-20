@@ -33,8 +33,8 @@ import net.hydromatic.sqllogictest.TestStatistics;
  * It is still useful to validate that the test parsing works.
  */
 public class NoExecutor extends SqlSltTestExecutor {
-  @Override
-  public TestStatistics execute(SltTestFile testFile, ExecutionOptions options) {
+  @Override public TestStatistics execute(SltTestFile testFile,
+      ExecutionOptions options) {
     TestStatistics result = new TestStatistics(options.stopAtFirstError);
     this.startTest();
     result.setFailed(0);
