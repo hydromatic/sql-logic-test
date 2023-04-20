@@ -36,6 +36,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintStream;
 import java.net.URL;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
@@ -56,32 +57,35 @@ import java.util.zip.ZipInputStream;
 /**
  * Execute all SqlLogicTest tests.
  */
-public class Main {
-  private Main() {
-  }
+public final class Main {
+  final boolean exit;
+  final PrintStream out;
+  final PrintStream err;
+  final ExecutionOptions options;
+  final String[] args;
 
   static final String SLT_GIT =
       "https://github.com/gregrahn/sqllogictest/archive/refs/heads/master.zip";
 
   static class TestLoader extends SimpleFileVisitor<Path> {
+    final Main main;
     int errors = 0;
     final TestStatistics statistics;
-    public final ExecutionOptions options;
 
     /**
      * Creates a new class that reads tests from a directory tree and
      * executes them.
      */
-    TestLoader(ExecutionOptions options) {
-      this.statistics = new TestStatistics(options.stopAtFirstError);
-      this.options = options;
+    TestLoader(Main main) {
+      this.statistics = new TestStatistics(main.options.stopAtFirstError);
+      this.main = main;
     }
 
     @Override public FileVisitResult visitFile(Path file,
         BasicFileAttributes attrs) {
       SqlSltTestExecutor executor;
       try {
-        executor = this.options.getExecutor();
+        executor = main.options.getExecutor();
       } catch (IOException | SQLException e) {
         // Can't add exceptions to the overridden method visitFile
         throw new RuntimeException(e);
@@ -92,17 +96,17 @@ public class Main {
           && extension.equals("test")) {
         SltTestFile test = null;
         try {
-          System.out.println("Running " + file);
+          main.out.println("Running " + file);
           test = new SltTestFile(file.toString());
           test.parse();
         } catch (Exception ex) {
-          System.err.println("Error while executing test " + file + ": "
+          main.err.println("Error while executing test " + file + ": "
               + ex.getMessage());
           this.errors++;
         }
         if (test != null) {
           try {
-            TestStatistics stats = executor.execute(test, options);
+            TestStatistics stats = executor.execute(test, main.options);
             this.statistics.add(stats);
           } catch (SqlParseException | IOException
               | SQLException | NoSuchAlgorithmException ex) {
@@ -115,19 +119,18 @@ public class Main {
     }
   }
 
-  static int abort(boolean abort, ExecutionOptions options,
-      @Nullable String message) {
+  int abort(@Nullable String message) {
     if (message != null) {
-      System.err.println(message);
+      err.println(message);
     }
     options.usage();
-    if (abort) {
+    if (exit) {
       System.exit(1);
     }
     return 1;
   }
 
-  static @Nullable File newFile(File destinationDir, ZipEntry zipEntry)
+  @Nullable File newFile(File destinationDir, ZipEntry zipEntry)
       throws IOException {
     String name = zipEntry.getName();
     name = name.replace("sqllogictest-master/", "");
@@ -143,22 +146,22 @@ public class Main {
     return destFile;
   }
 
-  public static void install(File directory) throws IOException {
+  public void install(File directory) throws IOException {
     File zip = File.createTempFile("out", ".zip", new File("."));
-    System.out.println("Downloading SLT from " + SLT_GIT + " into "
+    out.println("Downloading SLT from " + SLT_GIT + " into "
         + zip.getAbsolutePath());
     zip.deleteOnExit();
     InputStream in = new URL(SLT_GIT).openStream();
     Files.copy(in, zip.toPath(), StandardCopyOption.REPLACE_EXISTING);
 
-    System.out.println("Unzipping data");
+    out.println("Unzipping data");
     try (ZipInputStream zis =
          new ZipInputStream(Files.newInputStream(zip.toPath()))) {
       ZipEntry zipEntry = zis.getNextEntry();
       while (zipEntry != null) {
         File newFile = newFile(directory, zipEntry);
         if (newFile != null) {
-          System.out.println("Creating " + newFile.getPath());
+          out.println("Creating " + newFile.getPath());
           if (zipEntry.isDirectory()) {
             if (!newFile.isDirectory() && !newFile.mkdirs()) {
               throw new IOException("Failed to create directory " + newFile);
@@ -184,61 +187,73 @@ public class Main {
     }
   }
 
-  @SuppressWarnings("java:S4792") // Log configuration is safe
-  public static void main(String[] argv) throws IOException {
-    main2(true, argv);
+  /** Command-line entry point. */
+  public static void main(String[] args) throws IOException {
+    main2(true, System.out, System.err, args);
   }
 
   /** As {@link #main} but does not call {@link System#exit} if {@code exit}
-   * is false. */
-  public static int main2(boolean exit, String[] argv) throws IOException {
+   * is false, and allows overriding stdout and stderr. */
+  @SuppressWarnings("java:S4792") // Log configuration is safe
+  public static int main2(boolean exit, PrintStream out, PrintStream err,
+      String[] args) throws IOException {
     Logger rootLogger = LogManager.getLogManager().getLogger("");
     rootLogger.setLevel(Level.WARNING);
     for (Handler h : rootLogger.getHandlers()) {
       h.setLevel(Level.INFO);
     }
+    return new Main(exit, out, err, args).run();
+  }
 
-    ExecutionOptions options = new ExecutionOptions();
+  /** Creates a Main. */
+  private Main(boolean exit, PrintStream out, PrintStream err, String[] args) {
+    this.exit = exit;
+    this.out = out;
+    this.err = err;
+    this.args = args;
+    this.options = new ExecutionOptions();
+  }
+
+  int run() throws IOException {
     try {
-      options.parse(argv);
-      System.out.println(options);
+      options.parse(args);
+      out.println(options);
     } catch (ParameterException ex) {
-      return abort(exit, options, null);
+      return abort(null);
     }
     if (options.help) {
-      return abort(exit, options, null);
+      return abort(null);
     }
     if (options.sltDirectory == null) {
-      return abort(exit, options,
-          "Please specify the directory with the SqlLogicTest suite using the -d flag");
+      return abort("Please specify the directory with the SqlLogicTest suite "
+          + "using the -d flag");
     }
 
     File dir = new File(options.sltDirectory);
     if (dir.exists()) {
       if (!dir.isDirectory()) {
-        return abort(exit, options,
-            options.sltDirectory + " is not a directory");
+        return abort(options.sltDirectory + " is not a directory");
       }
       if (options.install) {
-        System.err.println("Directory " + options.sltDirectory
+        err.println("Directory " + options.sltDirectory
             + " exists; skipping download");
       }
     } else {
       if (options.install) {
         install(dir);
       } else {
-        return abort(exit, options, options.sltDirectory
+        return abort(options.sltDirectory
             + " does not exist and no installation was specified");
       }
     }
 
-    TestLoader loader = new TestLoader(options);
+    TestLoader loader = new TestLoader(this);
     for (String file : options.getDirectories()) {
       Path path = Paths.get(options.sltDirectory + "/test/" + file);
       Files.walkFileTree(path, loader);
     }
-    System.out.println("Files that could not be not parsed: " + loader.errors);
-    System.out.println(loader.statistics);
+    out.println("Files that could not be not parsed: " + loader.errors);
+    out.println(loader.statistics);
     return 0;
   }
 }
