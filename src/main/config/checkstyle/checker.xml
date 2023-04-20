@@ -35,6 +35,18 @@
 <module name="Checker">
   <property name="localeLanguage" value="en"/>
 
+  <!-- Checks for headers -->
+  <!-- See http://checkstyle.sf.net/config_header.html -->
+    <!-- Verify that EVERY source file has the appropriate license -->
+  <module name="Header">
+    <property name="headerFile" value="${checkstyle.header.file}"/>
+    <property name="fileExtensions" value="java,jj,json,kt"/>
+  </module>
+  <module name="Header">
+    <property name="headerFile" value="src/main/config/checkstyle/header.properties.txt"/>
+    <property name="fileExtensions" value="properties,mvnw"/>
+  </module>
+
   <!-- Checks for Javadoc comments (checker).           -->
   <!-- See http://checkstyle.sf.net/config_javadoc.html -->
     <!-- Require package javadoc -->
