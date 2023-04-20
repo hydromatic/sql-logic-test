@@ -51,8 +51,11 @@ public interface ICastable {
   default <T> T as(Class<T> clazz, @Nullable String failureMessage) {
     T result = this.as(clazz);
     if (result == null) {
-      if (failureMessage == null)
-        failureMessage = this + "(" + this.getClass().getName() + ") is not an instance of " + clazz;
+      if (failureMessage == null) {
+        failureMessage =
+            this + "(" + this.getClass().getName() + ") is not an instance of "
+                + clazz;
+      }
       this.error(failureMessage);
     }
     assert result != null;

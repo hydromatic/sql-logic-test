@@ -39,44 +39,48 @@ import java.util.logging.Logger;
 /**
  * Represents the data from a .test file from the
  * SqlLogicTest test framework.
- */
-/*
- *         The Test file format is described at
- *         https://www.sqlite.org/sqllogictest/doc/tip/about.wiki.
  *
- *         Here is an example:
+ * <p>The Test file format is described at
+ * <a href="https://www.sqlite.org/sqllogictest/doc/tip/about.wiki">sqllite</a>.
  *
- *         hash-threshold 8
+ * <p>Here is an example:
  *
- *         statement ok
- *         CREATE TABLE t1(a INTEGER, b INTEGER, c INTEGER, d INTEGER, e INTEGER)
+ * <blockquote><pre>
+ * hash-threshold 8
  *
- *         statement ok
- *         INSERT INTO t1(e,c,b,d,a) VALUES(NULL,102,NULL,101,104)
+ * statement ok
+ * CREATE TABLE t1(a INTEGER, b INTEGER, c INTEGER, d INTEGER, e INTEGER)
  *
- *         statement ok
- *         INSERT INTO t1(a,c,d,e,b) VALUES(107,106,108,109,105)
+ * statement ok
+ * INSERT INTO t1(e,c,b,d,a) VALUES(NULL,102,NULL,101,104)
  *
- *         query I nosort
- *         SELECT CASE WHEN c>(SELECT avg(c) FROM t1) THEN a*2 ELSE b*10 END
- *           FROM t1
- *          ORDER BY 1
- *         ----
- *         30 values hashing to 3c13dee48d9356ae19af2515e05e6b54
+ * statement ok
+ * INSERT INTO t1(a,c,d,e,b) VALUES(107,106,108,109,105)
+ *
+ * query I nosort
+ * SELECT CASE WHEN c>(SELECT avg(c) FROM t1) THEN a*2 ELSE b*10 END
+ *   FROM t1
+ *  ORDER BY 1
+ * ----
+ * 30 values hashing to 3c13dee48d9356ae19af2515e05e6b54
+ * </pre></blockquote>
  *
  */
 public class SltTestFile {
   Logger logger = Logger.getLogger("SltTestFile");
 
   /**
-   * This policy accepts all SLT queries and statements written in the Postgres SQL language.
+   * This policy accepts all SLT queries and statements written in the Postgres
+   * SQL language.
    */
   static class PostgresPolicy {
     public boolean accept(List<String> skip, List<String> only) {
-      if (only.contains("postgresql"))
+      if (only.contains("postgresql")) {
         return true;
-      if (!only.isEmpty())
+      }
+      if (!only.isEmpty()) {
         return false;
+      }
       return !skip.contains("postgresql");
     }
   }
@@ -104,12 +108,14 @@ public class SltTestFile {
   }
 
   void error(String message) {
-    throw new RuntimeException("File " + this.testFile + "\nError at line " + this.lineno + ": " + message);
+    throw new RuntimeException("File " + this.testFile + "\n"
+        + "Error at line " + this.lineno + ": " + message);
   }
 
   private void undoRead(String line) {
-    if (this.nextLine != null)
+    if (this.nextLine != null) {
       throw new RuntimeException("Only one undoRead allowed");
+    }
     this.nextLine = line;
   }
 
@@ -121,8 +127,9 @@ public class SltTestFile {
     } else {
       this.lineno++;
       line = this.reader.readLine();
-      if (!nullOk && line == null)
+      if (!nullOk && line == null) {
         this.error("Test file ends prematurely");
+      }
       if (line == null) {
         this.done = true;
         line = "";
@@ -134,14 +141,16 @@ public class SltTestFile {
   String nextLine(boolean nullOk) throws IOException {
     while (true) {
       String line = this.getNextLine(nullOk);
-      if (this.done)
+      if (this.done) {
         return line;
+      }
       // Drop comments
       int sharp = line.indexOf("#");
-      if (sharp > 0)
+      if (sharp > 0) {
         return line.substring(0, sharp - 1);
-      else if (sharp < 0)
+      } else if (sharp < 0) {
         return line;
+      }
       // else read one more
     }
   }
@@ -151,34 +160,41 @@ public class SltTestFile {
    */
   private @Nullable SqlTestQuery parseTestQuery() throws IOException {
     @Nullable String line = this.nextLine(true);
-    if (this.done)
+    if (this.done) {
       return null;
-    while (line.isEmpty())
+    }
+    while (line.isEmpty()) {
       line = this.nextLine(false);
+    }
 
     if (!line.startsWith("query")) {
       this.error("Unexpected line: " + Utilities.singleQuote(line));
     }
     @Nullable SqlTestQuery result = new SqlTestQuery(this.testFile);
     line = line.substring("query" .length()).trim();
-    if (line.isEmpty())
+    if (line.isEmpty()) {
       this.error("Malformed query description " + line);
+    }
 
     line = result.outputDescription.parseType(line);
-    if (line == null)
+    if (line == null) {
       this.error("Could not parse output column types");
+    }
     assert line != null;
     line = line.trim();
-    if (line.isEmpty())
+    if (line.isEmpty()) {
       this.error("Malformed query description " + line);
+    }
 
     line = result.outputDescription.parseOrder(line);
-    if (line == null)
+    if (line == null) {
       this.error("Did not understand sort order");
+    }
     assert line != null;
     line = line.trim();
-    if (!line.isEmpty())
+    if (!line.isEmpty()) {
       result.setName(line);
+    }
 
     line = this.nextLine(false);
     StringBuilder query = new StringBuilder();
@@ -205,8 +221,10 @@ public class SltTestFile {
           line = line.substring(vi + vht.length()).trim();
           result.outputDescription.setHash(line);
           line = this.nextLine(true);
-          if (!this.done && !line.isEmpty())
-            this.error("Expected an empty line between tests: " + Utilities.singleQuote(line));
+          if (!this.done && !line.isEmpty()) {
+            this.error("Expected an empty line between tests: "
+                + Utilities.singleQuote(line));
+          }
         } else {
           result.outputDescription.clearResults();
           while (!line.isEmpty()) {
@@ -227,28 +245,33 @@ public class SltTestFile {
     String line;
     while (!this.done) {
       line = this.nextLine(true);
-      if (this.done)
+      if (this.done) {
         return;
-      if (line.isEmpty())
+      }
+      if (line.isEmpty()) {
         continue;
-      if (line.startsWith("hash-threshold"))
+      }
+      if (line.startsWith("hash-threshold")) {
         continue;
+      }
 
       List<String> skip = new ArrayList<>();
       List<String> only = new ArrayList<>();
       while (line.startsWith("onlyif") || line.startsWith("skipif")) {
         boolean sk = line.startsWith("skipif");
         String cond = line.substring("onlyif" .length()).trim();
-        if (sk)
+        if (sk) {
           skip.add(cond);
-        else
+        } else {
           only.add(cond);
+        }
         line = this.nextLine(false);
       }
 
       if (line.startsWith("halt")) {
-        if (policy.accept(skip, only))
+        if (policy.accept(skip, only)) {
           break;
+        }
         continue;
       }
 
@@ -262,13 +285,15 @@ public class SltTestFile {
         }
         String command = statement.toString();
         SltSqlStatement stat = new SltSqlStatement(command, ok);
-        if (policy.accept(skip, only))
+        if (policy.accept(skip, only)) {
           this.add(stat);
+        }
       } else {
         this.undoRead(line);
         SqlTestQuery test = this.parseTestQuery();
-        if (test != null && policy.accept(skip, only))
+        if (test != null && policy.accept(skip, only)) {
           this.add(test);
+        }
       }
     }
   }
@@ -276,16 +301,16 @@ public class SltTestFile {
   private void add(ISqlTestOperation operation) {
     logger.info(() -> "Operation added " + operation.toString());
     this.fileContents.add(operation);
-    if (operation.is(SqlTestQuery.class))
+    if (operation.is(SqlTestQuery.class)) {
       this.testCount++;
+    }
   }
 
   public int getTestCount() {
     return this.testCount;
   }
 
-  @Override
-  public String toString() {
+  @Override public String toString() {
     return this.testFile;
   }
 }

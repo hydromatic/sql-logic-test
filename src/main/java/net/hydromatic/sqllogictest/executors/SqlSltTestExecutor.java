@@ -27,6 +27,7 @@ package net.hydromatic.sqllogictest.executors;
 import net.hydromatic.sqllogictest.ExecutionOptions;
 import net.hydromatic.sqllogictest.SltTestFile;
 import net.hydromatic.sqllogictest.TestStatistics;
+
 import org.apache.calcite.sql.parser.SqlParseException;
 
 import java.io.IOException;
@@ -37,6 +38,7 @@ public abstract class SqlSltTestExecutor extends SqlTestExecutor {
   /**
    * Execute the specified test file.
    */
-  public abstract TestStatistics execute(SltTestFile testFile, ExecutionOptions options)
-      throws SqlParseException, IOException, SQLException, NoSuchAlgorithmException;
+  public abstract TestStatistics execute(SltTestFile testFile,
+      ExecutionOptions options) throws SqlParseException, IOException,
+                                       SQLException, NoSuchAlgorithmException;
 }
