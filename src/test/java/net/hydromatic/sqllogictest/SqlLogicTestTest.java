@@ -18,37 +18,29 @@ package net.hydromatic.sqllogictest;
 
 import org.junit.jupiter.api.Test;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.PrintStream;
-import java.nio.charset.StandardCharsets;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-/**
- * Tests {@link SqlLogicTest}.
- */
 public class SqlLogicTestTest {
-  private static final String UTF_8 = StandardCharsets.UTF_8.name();
+  @Test void testHelp() throws IOException {
+    int result = Main.execute(false, "-h");
+    assertEquals(1, result);
+  }
 
-  /** Test that prints usage information to stdout.
-   *
-   * <p>There is no way to redirect the usage output; JCommander writes directly
-   * to {@link System#console()}.
-   */
-  @Test void testMain() throws IOException {
-    final ByteArrayOutputStream baosOut = new ByteArrayOutputStream();
-    final PrintStream out = new PrintStream(baosOut);
-    final ByteArrayOutputStream baosErr = new ByteArrayOutputStream();
-    final PrintStream err = new PrintStream(baosErr);
-    Main.main2(false, out, err, new String[] {"-h"});
-    out.flush();
-    err.flush();
-    assertThat(baosErr.toString(UTF_8), is(""));
-    assertThat(baosOut.toString(UTF_8),
-        is("ExecutionOptions{root=null, files=[], execute=true, "
-            + "executor=calcite, stopAtFirstError=false}\n"));
+  @Test void runHsql() throws IOException {
+    Main.execute(false, "-d", "sqllogictest", "-i", "-e", "hsql", "select1.test");
+  }
+
+  //@Test
+  // Running this test requires a Postgres database named SLT with appropriate users and permissions
+  void runPsql() throws IOException {
+    Main.execute(false, "-d", "sqllogictest", "-i", "-e", "psql", "-v",
+            "-u", "postgres", "-p", "password", "/index/random/1000/slt_good_0.test");
+  }
+
+  @Test void runNoExecutor() throws IOException {
+    Main.execute(false, "-d", "sqllogictest", "-i", "-e", "none");
   }
 }
 

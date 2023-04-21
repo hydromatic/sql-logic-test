@@ -1,7 +1,6 @@
 /*
- * Copyright 2023 VMware, Inc.
+ * Copyright 2022 VMware, Inc.
  * SPDX-License-Identifier: MIT
- * SPDX-License-Identifier: Apache-2.0
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,21 +23,46 @@
 
 package net.hydromatic.sqllogictest.executors;
 
-import net.hydromatic.sqllogictest.ExecutionOptions;
-import net.hydromatic.sqllogictest.SltTestFile;
-import net.hydromatic.sqllogictest.TestStatistics;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import org.apache.calcite.sql.parser.SqlParseException;
+/**
+ * Utility interface providing some useful casting methods.
+ */
+public interface ICastable {
+  @Nullable
+  default <T> T as(Class<T> clazz) {
+    return ICastable.as(this, clazz);
+  }
 
-import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
-import java.sql.SQLException;
+  @Nullable
+  static <T> T as(Object obj, Class<T> clazz) {
+    try {
+      return clazz.cast(obj);
+    } catch (ClassCastException e) {
+      return null;
+    }
+  }
 
-public abstract class SqlSltTestExecutor extends SqlTestExecutor {
-  /**
-   * Execute the specified test file.
-   */
-  public abstract TestStatistics execute(SltTestFile testFile,
-      ExecutionOptions options) throws SqlParseException, IOException,
-                                       SQLException, NoSuchAlgorithmException;
+  default void error(String message) {
+    System.err.println(message);
+  }
+
+  default <T> T as(Class<T> clazz, @Nullable String failureMessage) {
+    T result = this.as(clazz);
+    if (result == null) {
+      if (failureMessage == null)
+        failureMessage = this + "(" + this.getClass().getName() + ") is not an instance of " + clazz;
+      this.error(failureMessage);
+    }
+    assert result != null;
+    return result;
+  }
+
+  default <T> T to(Class<T> clazz) {
+    return this.as(clazz, (String) null);
+  }
+
+  default <T> boolean is(Class<T> clazz) {
+    return this.as(clazz) != null;
+  }
 }

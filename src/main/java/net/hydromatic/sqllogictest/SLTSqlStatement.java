@@ -1,7 +1,6 @@
 /*
  * Copyright 2022 VMware, Inc.
  * SPDX-License-Identifier: MIT
- * SPDX-License-Identifier: Apache-2.0
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,7 +23,19 @@
 
 package net.hydromatic.sqllogictest;
 
-/**
- * Base interface for SqlLogicTest operations: either statements or queries.
- */
-public interface ISqlTestOperation extends ICastable { }
+import net.hydromatic.sqllogictest.executors.ISqlTestOperation;
+
+public class SLTSqlStatement implements ISqlTestOperation {
+  public final String statement;
+  public final boolean shouldPass;
+
+  public SLTSqlStatement(String statement, boolean shouldPass) {
+    this.statement = statement;
+    this.shouldPass = shouldPass;
+  }
+
+  @Override
+  public String toString() {
+    return this.statement;
+  }
+}

@@ -1,7 +1,6 @@
 /*
  * Copyright 2022 VMware, Inc.
  * SPDX-License-Identifier: MIT
- * SPDX-License-Identifier: Apache-2.0
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,22 +24,36 @@
 package net.hydromatic.sqllogictest.executors;
 
 import net.hydromatic.sqllogictest.ExecutionOptions;
-import net.hydromatic.sqllogictest.SltTestFile;
+import net.hydromatic.sqllogictest.SLTTestFile;
 import net.hydromatic.sqllogictest.TestStatistics;
 
 /**
  * This executor does not execute the tests at all.
  * It is still useful to validate that the test parsing works.
  */
-public class NoExecutor extends SqlSltTestExecutor {
-  @Override public TestStatistics execute(SltTestFile testFile,
-      ExecutionOptions options) {
+public class NoExecutor extends SqlSLTTestExecutor {
+  NoExecutor(ExecutionOptions options) {
+    super(options);
+  }
+
+  public static class Factory extends ExecutorFactory {
+    public static Factory INSTANCE = new Factory();
+    private Factory() {}
+
+    @Override
+    public void register(ExecutionOptions execOptions) {
+      execOptions.registerExecutor("none", () -> new NoExecutor(execOptions));
+    }
+  }
+
+  @Override
+  public TestStatistics execute(SLTTestFile testFile, ExecutionOptions options) {
     TestStatistics result = new TestStatistics(options.stopAtFirstError);
     this.startTest();
     result.setFailed(0);
     result.setIgnored(testFile.getTestCount());
     result.setPassed(0);
-    this.reportTime(testFile.getTestCount());
+    options.message(this.elapsedTime(testFile.getTestCount()), 1);
     return result;
   }
 }

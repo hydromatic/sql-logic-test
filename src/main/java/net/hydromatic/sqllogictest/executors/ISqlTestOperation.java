@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 VMware, Inc.
+ * Copyright 2022 VMware, Inc.
  * SPDX-License-Identifier: MIT
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -21,42 +21,9 @@
  * SOFTWARE.
  */
 
-package net.hydromatic.sqllogictest;
-
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
+package net.hydromatic.sqllogictest.executors;
 
 /**
- * A PrintStream that writes do a String.
+ * Base interface for SqlLogicTest operations: either statements or queries.
  */
-public class StringPrintStream {
-  PrintStream stream;
-  ByteArrayOutputStream byteStream;
-  boolean closed = false;
-
-  public StringPrintStream() {
-    this.byteStream = new ByteArrayOutputStream();
-    try {
-      this.stream = new PrintStream(this.byteStream, true, StandardCharsets.UTF_8.name());
-    } catch (UnsupportedEncodingException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  public PrintStream getPrintStream() {
-    return this.stream;
-  }
-
-  /**
-   * Get the data written so far.  Once this is done the stream is closed and can't be used anymore.
-   */
-  @Override
-  public String toString() {
-    if (!this.closed)
-      this.stream.close();
-    this.closed = true;
-    return this.byteStream.toString();
-  }
-}
+public interface ISqlTestOperation extends ICastable { }

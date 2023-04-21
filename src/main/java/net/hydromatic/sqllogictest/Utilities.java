@@ -18,7 +18,6 @@
 package net.hydromatic.sqllogictest;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
@@ -33,43 +32,36 @@ public class Utilities {
     return "'" + other + "'";
   }
 
-  @Nullable public static String getFileExtension(String filename) {
+  @Nullable
+  public static String getFileExtension(String filename) {
     int i = filename.lastIndexOf('.');
-    if (i > 0) {
-      return filename.substring(i + 1);
-    }
+    if (i > 0)
+      return filename.substring(i+1);
     return null;
   }
 
-  private static final char[] HEX_CODES = "0123456789abcdef".toCharArray();
+  private static final char[] hexCode = "0123456789abcdef".toCharArray();
 
   public static String toHex(byte[] data) {
     StringBuilder r = new StringBuilder(data.length * 2);
     for (byte b : data) {
-      r.append(HEX_CODES[(b >> 4) & 0xF]);
-      r.append(HEX_CODES[b & 0xF]);
+      r.append(hexCode[(b >> 4) & 0xF]);
+      r.append(hexCode[(b & 0xF)]);
     }
     return r.toString();
   }
 
   public static <T, S> List<S> map(List<T> data, Function<T, S> function) {
     List<S> result = new ArrayList<>(data.size());
-    for (T aData : data) {
+    for (T aData : data)
       result.add(function.apply(aData));
-    }
     return result;
   }
 
-  public static <T, S> List<S> flatMap(List<T> data,
-      Function<T, List<S>> function) {
+  public static <T, S> List<S> flatMap(List<T> data, Function<T, List<S>> function) {
     List<S> result = new ArrayList<>(data.size());
-    for (T aData : data) {
+    for (T aData : data)
       result.addAll(function.apply(aData));
-    }
     return result;
-  }
-
-  public static String getEmptyString() {
-    return "";
   }
 }

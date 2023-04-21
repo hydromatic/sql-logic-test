@@ -107,20 +107,24 @@
   </repositories>
 
   <dependencies>
+    <!-- HyperSQL Java database -->
     <dependency>
-      <groupId>com.beust</groupId>
-      <artifactId>jcommander</artifactId>
-      <version>${jcommander.version}</version>
+      <groupId>org.hsqldb</groupId>
+      <artifactId>hsqldb</artifactId>
+      <version>2.7.1</version>
+      <classifier>jdk8</classifier>
+    </dependency>
+    <!-- The following is necessary only if you want to use the JDBC Postgres driver
+            for testing -->
+    <dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+      <version>42.6.0</version>
     </dependency>
     <dependency>
       <groupId>org.checkerframework</groupId>
       <artifactId>checker-qual</artifactId>
       <version>${checkerframework.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.calcite</groupId>
-      <artifactId>calcite-core</artifactId>
-      <version>${calcite.version}</version>
     </dependency>
     <dependency>
       <groupId>org.hamcrest</groupId>

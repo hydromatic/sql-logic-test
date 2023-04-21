@@ -4,3 +4,4 @@ target
 *.iml
 settings.xml
 .mvn/wrapper/maven-wrapper.jar
+sqllogictest

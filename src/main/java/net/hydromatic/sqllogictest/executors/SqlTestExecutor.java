@@ -1,7 +1,6 @@
 /*
  * Copyright 2023 VMware, Inc.
  * SPDX-License-Identifier: MIT
- * SPDX-License-Identifier: Apache-2.0
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,8 +23,6 @@
 
 package net.hydromatic.sqllogictest.executors;
 
-import net.hydromatic.sqllogictest.ICastable;
-
 import java.text.DecimalFormat;
 import java.util.HashSet;
 import java.util.Set;
@@ -34,13 +31,9 @@ import java.util.Set;
  * Base class for classes that can run tests.
  */
 public class SqlTestExecutor implements ICastable {
-  static final DecimalFormat DF = new DecimalFormat("#,###");
-
+  static final DecimalFormat df = new DecimalFormat("#,###");
   protected final Set<String> buggyOperations;
-  /**
-   * If true validate the status of the SQL statements executed.
-   */
-  protected boolean validateStatus = true;
+
   private static long startTime = -1;
   private static int totalTests = 0;
   private long lastTestStartTime;
@@ -58,25 +51,20 @@ public class SqlTestExecutor implements ICastable {
     this.buggyOperations.addAll(statementsToSkip);
   }
 
-  public void setValidateStatus(boolean validate) {
-    this.validateStatus = validate;
-  }
-
   @SuppressWarnings("java:S2696")  // static variable accessed
-  protected void reportTime(int tests) {
+  protected String elapsedTime(int tests) {
     long end = System.nanoTime();
     totalTests += tests;
-    System.out.println(DF.format(tests) + " tests took "
-        + DF.format(seconds(end, this.lastTestStartTime)) + "s, "
-        + DF.format(totalTests) + " took "
-        + DF.format(seconds(end, startTime)) + "s");
+    return df.format(tests) + " tests took " +
+        df.format(seconds(end, this.lastTestStartTime)) + "s, "
+        + df.format(totalTests) + " took " +
+        df.format(seconds(end, startTime)) + "s";
   }
 
   @SuppressWarnings("java:S2696")  // static variable accessed
   protected void startTest() {
     this.lastTestStartTime = System.nanoTime();
-    if (startTime == -1) {
+    if (startTime == -1)
       startTime = lastTestStartTime;
-    }
   }
 }

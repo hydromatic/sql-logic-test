@@ -1,7 +1,6 @@
 /*
  * Copyright 2022 VMware, Inc.
  * SPDX-License-Identifier: MIT
- * SPDX-License-Identifier: Apache-2.0
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,10 +23,9 @@
 
 package net.hydromatic.sqllogictest;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
-
 import java.util.ArrayList;
 import java.util.List;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class SqlTestQueryOutputDescription {
   // These correspond directly to SLT strings.
@@ -41,13 +39,16 @@ public class SqlTestQueryOutputDescription {
   /**
    * Encoded types of columns expected in result.
    */
-  public @Nullable String columnTypes;
-  public @Nullable String hash;
+  @Nullable
+  public String columnTypes;
+  @Nullable
+  public String hash;
   /**
    * How results are sorted.
    */
   SortOrder order;
-  @Nullable List<String> queryResults;
+  @Nullable
+  List<String> queryResults;
 
   public SqlTestQueryOutputDescription() {
     this.columnTypes = null;
@@ -61,7 +62,8 @@ public class SqlTestQueryOutputDescription {
     return this.order;
   }
 
-  public @Nullable List<String> getQueryResults() {
+  @Nullable
+  public List<String> getQueryResults() {
     return this.queryResults;
   }
 
@@ -74,9 +76,8 @@ public class SqlTestQueryOutputDescription {
   }
 
   public void addResultLine(String line) {
-    if (this.queryResults == null) {
+    if (this.queryResults == null)
       throw new RuntimeException("queryResults were not initialized");
-    }
     this.queryResults.add(line);
     this.valueCount++;
   }
@@ -87,11 +88,11 @@ public class SqlTestQueryOutputDescription {
    * @param line A string that starts with the output type.
    * @return The tail of the string or null on error.
    */
-  @Nullable String parseType(String line) {
+  @Nullable
+  String parseType(String line) {
     int space = line.indexOf(" ");
-    if (space < 0) {
+    if (space < 0)
       throw new RuntimeException("No column types identified");
-    }
     this.columnTypes = line.substring(0, space).trim();
     for (int i = 0; i < this.columnTypes.length(); i++) {
       // Type of result encoded as characters.
@@ -115,7 +116,8 @@ public class SqlTestQueryOutputDescription {
    * @return null on failure, the remaining string if the order is recognized.
    */
   @SuppressWarnings("SpellCheckingInspection")
-  @Nullable String parseOrder(String orderDescription) {
+  @Nullable
+  String parseOrder(String orderDescription) {
     if (orderDescription.startsWith("nosort")) {
       this.order = SortOrder.NONE;
       return orderDescription.substring("nosort" .length());
@@ -141,9 +143,8 @@ public class SqlTestQueryOutputDescription {
    * Return -1 if the output size is not known.
    */
   public int getExpectedOutputSize() {
-    if (this.columnTypes == null || this.valueCount < 0) {
+    if (this.columnTypes == null || this.valueCount < 0)
       return -1;
-    }
     return this.valueCount / this.columnTypes.length();
   }
 }

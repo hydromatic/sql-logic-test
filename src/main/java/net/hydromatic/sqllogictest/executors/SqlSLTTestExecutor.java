@@ -1,7 +1,6 @@
-/*
- * Copyright 2022 VMware, Inc.
+package net.hydromatic.sqllogictest.executors;/*
+ * Copyright 2023 VMware, Inc.
  * SPDX-License-Identifier: MIT
- * SPDX-License-Identifier: Apache-2.0
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,18 +21,24 @@
  * SOFTWARE.
  */
 
-package net.hydromatic.sqllogictest;
+import net.hydromatic.sqllogictest.ExecutionOptions;
+import net.hydromatic.sqllogictest.SLTTestFile;
+import net.hydromatic.sqllogictest.TestStatistics;
 
-public class SltSqlStatement implements ISqlTestOperation {
-  public final String statement;
-  public final boolean shouldPass;
+import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+import java.sql.SQLException;
 
-  public SltSqlStatement(String statement, boolean shouldPass) {
-    this.statement = statement;
-    this.shouldPass = shouldPass;
+public abstract class SqlSLTTestExecutor extends SqlTestExecutor {
+  protected final ExecutionOptions options;
+
+  SqlSLTTestExecutor(ExecutionOptions options) {
+    this.options = options;
   }
 
-  @Override public String toString() {
-    return this.statement;
-  }
+  /**
+   * Execute the specified test file.
+   */
+  public abstract TestStatistics execute(SLTTestFile testFile, ExecutionOptions options)
+      throws IOException, SQLException, NoSuchAlgorithmException;
 }
