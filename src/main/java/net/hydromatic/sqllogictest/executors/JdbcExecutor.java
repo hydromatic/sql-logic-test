@@ -1,7 +1,6 @@
 /*
  * Copyright 2022 VMware, Inc.
  * SPDX-License-Identifier: MIT
- * SPDX-License-Identifier: Apache-2.0
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,7 +24,6 @@
 package net.hydromatic.sqllogictest.executors;
 
 import net.hydromatic.sqllogictest.ExecutionOptions;
-import net.hydromatic.sqllogictest.ISqlTestOperation;
 import net.hydromatic.sqllogictest.SltSqlStatement;
 import net.hydromatic.sqllogictest.SltTestFile;
 import net.hydromatic.sqllogictest.SqlTestQuery;
@@ -39,7 +37,6 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLDataException;
@@ -48,15 +45,16 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.logging.Logger;
 
 @SuppressWarnings({"SqlDialectInspection", "SqlNoDataSourceInspection"})
-public class JdbcExecutor extends SqlSltTestExecutor {
-  Logger logger = Logger.getLogger("JdbcExecutor");
-  public final String dbUrl;
-  @Nullable Connection connection;
+public abstract class JdbcExecutor extends SqlSltTestExecutor {
+  protected final String username;
+  protected final String password;
 
-  // In the end everything is decoded as a string
+  public final String dbUrl;
+  protected @Nullable Connection connection;
+
+  // In SLT all data received from the database is converted to strings.
   static class Row {
     public final List<String> values;
 
@@ -73,6 +71,9 @@ public class JdbcExecutor extends SqlSltTestExecutor {
     }
   }
 
+  /**
+   * A set of rows produced as a result of a query execution.
+   */
   static class Rows {
     List<Row> allRows;
 
@@ -113,18 +114,38 @@ public class JdbcExecutor extends SqlSltTestExecutor {
     }
   }
 
-  public JdbcExecutor(String dbUrl) {
+  public JdbcExecutor(ExecutionOptions options, String dbUrl, String username,
+      String password) {
+    super(options);
     this.dbUrl = dbUrl;
+    this.username = username;
+    this.password = password;
     this.connection = null;
   }
 
   void statement(SltSqlStatement statement) throws SQLException {
-    logger.info(() -> this.statementsExecuted + ": " + statement.statement);
+    String stat = statement.statement;
+    // Some tests drop views in the wrong order, e.g.,
+    // sqllogictest/test/index/view/1000/slt_good_0.test
+    if (stat.toLowerCase().startsWith("drop view")) {
+      if (!stat.toLowerCase().contains("if exists")) {
+        stat = stat.substring(0, 9) + " IF EXISTS " + stat.substring(10);
+      }
+      if (!stat.toLowerCase().contains("cascade")) {
+        stat += " CASCADE";
+      }
+    }
+    this.options.message(this.statementsExecuted + ": " + stat, 2);
     assert this.connection != null;
+    if (this.buggyOperations.contains(statement.statement)
+        || this.options.doNotExecute) {
+      options.message("Skipping " + statement.statement, 2);
+      return;
+    }
     try (Statement stmt = this.connection.createStatement()) {
-      stmt.execute(statement.statement);
+      stmt.execute(stat);
     } catch (SQLException ex) {
-      logger.severe("ERROR: " + ex.getMessage());
+      options.error(ex);
       // Failures during the execution of statements are fatal.
       // Only failures in queries are handled.
       throw ex;
@@ -135,18 +156,25 @@ public class JdbcExecutor extends SqlSltTestExecutor {
   void query(SqlTestQuery query, TestStatistics statistics)
       throws SQLException, NoSuchAlgorithmException {
     assert this.connection != null;
-    if (this.buggyOperations.contains(query.getQuery())) {
-      logger.warning(() -> "Skipping " + query.getQuery());
+    if (this.buggyOperations.contains(query.getQuery())
+        || this.options.doNotExecute) {
+      statistics.incIgnored();
+      options.message("Skipping " + query.getQuery(), 2);
       return;
     }
     try (Statement stmt = this.connection.createStatement()) {
-      ResultSet resultSet = stmt.executeQuery(query.getQuery());
-      this.validate(query, resultSet, query.outputDescription, statistics);
-      resultSet.close();
+      try (ResultSet resultSet = stmt.executeQuery(query.getQuery())) {
+        this.validate(query, resultSet, query.outputDescription, statistics);
+      }
     }
-    logger.info(() -> statistics.testsRun() + ": " + query.getQuery());
+    options.message(statistics.testsRun() + ": " + query.getQuery(), 2);
   }
 
+  /**
+   * This is the SLT logic which decodes the data received from a Query.
+   * Sometimes the result type does not match the actual query type,
+   * and a conversion is performed.  This function specifies this logic.
+   */
   Row getValue(ResultSet rs, String columnTypes) throws SQLException {
     Row row = new Row();
     // Column numbers start from 1
@@ -231,7 +259,8 @@ public class JdbcExecutor extends SqlSltTestExecutor {
       statistics.addFailure(
           new TestStatistics.FailedTestDescription(query,
               "Expected " + description.getValueCount() + " rows, got "
-                  + rows.size() * description.columnTypes.length()));
+                  + rows.size() * description.columnTypes.length(),
+              null, options.verbosity > 0));
       return;
     }
     rows.sort(description.getOrder());
@@ -240,7 +269,8 @@ public class JdbcExecutor extends SqlSltTestExecutor {
       String q = String.join("\n", description.getQueryResults());
       if (!r.equals(q)) {
         statistics.addFailure(new TestStatistics.FailedTestDescription(
-            query, "Output differs: computed\n" + r + "\nExpected:\n" + q));
+            query, "Output differs: computed\n" + r + "\nExpected:\n" + q,
+            null, options.verbosity > 0));
         return;
       }
     }
@@ -254,42 +284,23 @@ public class JdbcExecutor extends SqlSltTestExecutor {
       String hash = Utilities.toHex(digest);
       if (!description.hash.equals(hash)) {
         statistics.addFailure(new TestStatistics.FailedTestDescription(
-            query, "Hash of data does not match expected value"));
+            query, "Hash of data does not match expected value", null,
+            options.verbosity > 0));
         return;
       }
     }
     statistics.incPassed();
   }
 
-  List<String> getTableList() throws SQLException {
-    List<String> result = new ArrayList<>();
-    assert this.connection != null;
-    DatabaseMetaData md = this.connection.getMetaData();
-    ResultSet rs = md.getTables(null, null, "%", new String[]{"TABLE"});
-    while (rs.next()) {
-      String tableName = rs.getString(3);
-      if (tableName.equals("PUBLIC")) {
-        // The catalog table in HSQLDB
-        continue;
-      }
-      result.add(tableName);
-    }
-    rs.close();
-    return result;
-  }
+  /**
+   * Returns a list of all tables in the database.
+   */
+  abstract List<String> getTableList() throws SQLException;
 
-  List<String> getViewList() throws SQLException {
-    List<String> result = new ArrayList<>();
-    assert this.connection != null;
-    DatabaseMetaData md = this.connection.getMetaData();
-    ResultSet rs = md.getTables(null, null, "%", new String[]{"VIEW"});
-    while (rs.next()) {
-      String tableName = rs.getString(3);
-      result.add(tableName);
-    }
-    rs.close();
-    return result;
-  }
+  /**
+   * Returns a list of all views in the database.
+   */
+  abstract List<String> getViewList() throws SQLException;
 
   void dropAllTables() throws SQLException {
     assert this.connection != null;
@@ -298,8 +309,8 @@ public class JdbcExecutor extends SqlSltTestExecutor {
       // Unfortunately prepare statements cannot be parameterized in
       // table names.  Sonar complains about this, but there is
       // nothing we can do but suppress the warning.
-      String del = "DROP TABLE " + tableName;
-      logger.info(del);
+      String del = "DROP TABLE " + tableName + " CASCADE";
+      options.message(del, 2);
       try (Statement drop = this.connection.createStatement()) {
         drop.execute(del);  // NOSONAR
       }
@@ -314,24 +325,17 @@ public class JdbcExecutor extends SqlSltTestExecutor {
       // table names.  Sonar complains about this, but there is
       // nothing we can do but suppress the warning.
       String del = "DROP VIEW IF EXISTS " + tableName + " CASCADE";
-      logger.info(del);
+      options.message(del, 2);
       try (Statement drop = this.connection.createStatement()) {
         drop.execute(del);  // NOSONAR
       }
     }
   }
 
-  @SuppressWarnings("java:S2115")
   public void establishConnection() throws SQLException {
-    // The empty string for the user and password is not a security a problem
-    // because this is a temporary in-memory database.
     this.connection = DriverManager.getConnection(
-        this.dbUrl, Utilities.getEmptyString(), Utilities.getEmptyString());
+        this.dbUrl, this.username, this.password);
     assert this.connection != null;
-    try (Statement statement = this.connection.createStatement()) {
-      // Enable postgres compatibility
-      statement.execute("SET DATABASE SQL SYNTAX PGS TRUE");
-    }
   }
 
   public void closeConnection() throws SQLException {
@@ -340,28 +344,36 @@ public class JdbcExecutor extends SqlSltTestExecutor {
   }
 
   @Override public TestStatistics execute(SltTestFile file,
-      ExecutionOptions options) throws SQLException, NoSuchAlgorithmException {
+      ExecutionOptions options)
+      throws SQLException, NoSuchAlgorithmException {
     this.startTest();
     this.establishConnection();
     this.dropAllTables();
     TestStatistics result = new TestStatistics(options.stopAtFirstError);
     for (ISqlTestOperation operation : file.fileContents) {
-      try {
-        SltSqlStatement stat = operation.as(SltSqlStatement.class);
-        if (stat != null) {
+      SltSqlStatement stat = operation.as(SltSqlStatement.class);
+      if (stat != null) {
+        try {
           this.statement(stat);
-        } else {
-          SqlTestQuery query = operation.to(SqlTestQuery.class);
-          this.query(query, result);
+        } catch (SQLException ex) {
+          options.err.println("Error while processing #"
+              + (result.testsRun() + 1) + " " + operation);
+          throw ex;
         }
-      } catch (SQLException ex) {
-        System.err.println("Error while processing #" + result.testsRun()
-            + " " + operation);
-        throw ex;
+      } else {
+        SqlTestQuery query = operation.to(options.err, SqlTestQuery.class);
+        try {
+          this.query(query, result);
+        } catch (SQLException ex) {
+          result.addFailure(new TestStatistics.FailedTestDescription(
+              query, ex.getMessage(), ex, options.verbosity > 0));
+        }
       }
     }
+    this.dropAllViews();
+    this.dropAllTables();
     this.closeConnection();
-    this.reportTime(result.getPassed());
+    options.message(this.elapsedTime(file.getTestCount()), 1);
     return result;
   }
 }

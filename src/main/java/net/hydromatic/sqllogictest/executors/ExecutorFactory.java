@@ -1,7 +1,6 @@
 /*
  * Copyright 2022 VMware, Inc.
  * SPDX-License-Identifier: MIT
- * SPDX-License-Identifier: Apache-2.0
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,53 +19,19 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
- *
  */
 
-package net.hydromatic.sqllogictest;
+package net.hydromatic.sqllogictest.executors;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
+import net.hydromatic.sqllogictest.ExecutionOptions;
 
 /**
- * Utility interface providing some useful casting methods.
+ * An executor factory creates a {@link SqlTestExecutor}.
  */
-public interface ICastable {
-  default <T> @Nullable T as(Class<T> clazz) {
-    return ICastable.as(this, clazz);
-  }
-
-  static <T> @Nullable T as(Object obj, Class<T> clazz) {
-    try {
-      return clazz.cast(obj);
-    } catch (ClassCastException e) {
-      return null;
-    }
-  }
-
-  default void error(String message) {
-    System.err.println(message);
-  }
-
-  default <T> T as(Class<T> clazz, @Nullable String failureMessage) {
-    T result = this.as(clazz);
-    if (result == null) {
-      if (failureMessage == null) {
-        failureMessage =
-            this + "(" + this.getClass().getName() + ") is not an instance of "
-                + clazz;
-      }
-      this.error(failureMessage);
-    }
-    assert result != null;
-    return result;
-  }
-
-  default <T> T to(Class<T> clazz) {
-    return this.as(clazz, (String) null);
-  }
-
-  default <T> boolean is(Class<T> clazz) {
-    return this.as(clazz) != null;
-  }
+public abstract class ExecutorFactory {
+  /**
+   * Register this factory with the Execution options.
+   * May install new command-line flags as well.
+   */
+  public abstract void register(ExecutionOptions options);
 }

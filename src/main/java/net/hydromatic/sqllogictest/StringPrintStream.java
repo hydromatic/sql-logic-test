@@ -1,7 +1,6 @@
 /*
  * Copyright 2023 VMware, Inc.
  * SPDX-License-Identifier: MIT
- * SPDX-License-Identifier: Apache-2.0
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -34,13 +33,17 @@ import java.nio.charset.StandardCharsets;
  */
 public class StringPrintStream {
   PrintStream stream;
-  ByteArrayOutputStream byteStream;
+  final ByteArrayOutputStream byteStream;
   boolean closed = false;
 
-  public StringPrintStream() throws UnsupportedEncodingException {
+  public StringPrintStream() {
     this.byteStream = new ByteArrayOutputStream();
-    this.stream =
-        new PrintStream(this.byteStream, true, StandardCharsets.UTF_8.name());
+    try {
+      this.stream =
+          new PrintStream(this.byteStream, true, StandardCharsets.UTF_8.name());
+    } catch (UnsupportedEncodingException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   public PrintStream getPrintStream() {
@@ -48,7 +51,7 @@ public class StringPrintStream {
   }
 
   /**
-   * Gets the data written so far.  Once this is done the stream is
+   * Get the data written so far.  Once this is done the stream is
    * closed and can't be used anymore.
    */
   @Override public String toString() {

@@ -1,7 +1,6 @@
 /*
  * Copyright 2022 VMware, Inc.
  * SPDX-License-Identifier: MIT
- * SPDX-License-Identifier: Apache-2.0
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,11 +19,11 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
- *
  */
 
 package net.hydromatic.sqllogictest;
+
+import net.hydromatic.sqllogictest.executors.ISqlTestOperation;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -34,41 +33,37 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
 
 /**
  * Represents the data from a .test file from the
  * SqlLogicTest test framework.
+ */
+/*
+ *         The Test file format is described at
+ *         https://www.sqlite.org/sqllogictest/doc/tip/about.wiki.
  *
- * <p>The Test file format is described at
- * <a href="https://www.sqlite.org/sqllogictest/doc/tip/about.wiki">sqllite</a>.
+ *         Here is an example:
  *
- * <p>Here is an example:
+ *         hash-threshold 8
  *
- * <blockquote><pre>
- * hash-threshold 8
+ *         statement ok
+ *         CREATE TABLE t1(a INTEGER, b INTEGER, c INTEGER, d INTEGER, e INTEGER)
  *
- * statement ok
- * CREATE TABLE t1(a INTEGER, b INTEGER, c INTEGER, d INTEGER, e INTEGER)
+ *         statement ok
+ *         INSERT INTO t1(e,c,b,d,a) VALUES(NULL,102,NULL,101,104)
  *
- * statement ok
- * INSERT INTO t1(e,c,b,d,a) VALUES(NULL,102,NULL,101,104)
+ *         statement ok
+ *         INSERT INTO t1(a,c,d,e,b) VALUES(107,106,108,109,105)
  *
- * statement ok
- * INSERT INTO t1(a,c,d,e,b) VALUES(107,106,108,109,105)
- *
- * query I nosort
- * SELECT CASE WHEN c&gt;(SELECT avg(c) FROM t1) THEN a*2 ELSE b*10 END
- *   FROM t1
- *  ORDER BY 1
- * ----
- * 30 values hashing to 3c13dee48d9356ae19af2515e05e6b54
- * </pre></blockquote>
+ *         query I nosort
+ *         SELECT CASE WHEN c>(SELECT avg(c) FROM t1) THEN a*2 ELSE b*10 END
+ *           FROM t1
+ *          ORDER BY 1
+ *         ----
+ *         30 values hashing to 3c13dee48d9356ae19af2515e05e6b54
  *
  */
 public class SltTestFile {
-  Logger logger = Logger.getLogger("SltTestFile");
-
   /**
    * This policy accepts all SLT queries and statements written in the Postgres
    * SQL language.
@@ -108,8 +103,8 @@ public class SltTestFile {
   }
 
   void error(String message) {
-    throw new RuntimeException("File " + this.testFile + "\n"
-        + "Error at line " + this.lineno + ": " + message);
+    throw new RuntimeException("File " + this.testFile
+        + "\nError at line " + this.lineno + ": " + message);
   }
 
   private void undoRead(String line) {
@@ -163,6 +158,7 @@ public class SltTestFile {
     if (this.done) {
       return null;
     }
+    assert line != null;  // otherwise 'done' should be set
     while (line.isEmpty()) {
       line = this.nextLine(false);
     }
@@ -199,10 +195,10 @@ public class SltTestFile {
     line = this.nextLine(false);
     StringBuilder query = new StringBuilder();
     if (!this.done) {
-      while (!line.startsWith("----")) {
+      while (!this.done && !line.startsWith("----")) {
         query.append(" ");
         query.append(line);
-        line = this.nextLine(false);
+        line = this.nextLine(true);
       }
     }
 
@@ -239,7 +235,7 @@ public class SltTestFile {
     return result;
   }
 
-  public void parse() throws IOException {
+  public void parse(ExecutionOptions options) throws IOException {
     PostgresPolicy policy = new PostgresPolicy();
 
     String line;
@@ -279,27 +275,27 @@ public class SltTestFile {
         boolean ok = line.startsWith("statement ok");
         line = this.nextLine(false);
         StringBuilder statement = new StringBuilder();
-        while (!line.isEmpty()) {
+        while (!this.done && !line.isEmpty()) {
           statement.append(line);
-          line = this.nextLine(false);
+          line = this.nextLine(true);
         }
         String command = statement.toString();
         SltSqlStatement stat = new SltSqlStatement(command, ok);
         if (policy.accept(skip, only)) {
-          this.add(stat);
+          this.add(stat, options);
         }
       } else {
         this.undoRead(line);
         SqlTestQuery test = this.parseTestQuery();
         if (test != null && policy.accept(skip, only)) {
-          this.add(test);
+          this.add(test, options);
         }
       }
     }
   }
 
-  private void add(ISqlTestOperation operation) {
-    logger.info(() -> "Operation added " + operation.toString());
+  private void add(ISqlTestOperation operation, ExecutionOptions options) {
+    options.message("Operation added " + operation.toString(), 2);
     this.fileContents.add(operation);
     if (operation.is(SqlTestQuery.class)) {
       this.testCount++;

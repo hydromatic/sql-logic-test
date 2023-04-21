@@ -1,7 +1,6 @@
 /*
  * Copyright 2023 VMware, Inc.
  * SPDX-License-Identifier: MIT
- * SPDX-License-Identifier: Apache-2.0
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,6 +23,8 @@
 
 package net.hydromatic.sqllogictest;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,16 +35,28 @@ public class TestStatistics {
   public static class FailedTestDescription {
     public final SqlTestQuery query;
     public final String error;
+    public final @Nullable Throwable exception;
+    public final boolean verbose;
 
-    public FailedTestDescription(SqlTestQuery query, String error) {
+    public FailedTestDescription(SqlTestQuery query, String error,
+        @Nullable Throwable exception, boolean verbose) {
       this.query = query;
       this.error = error;
+      this.exception = exception;
+      this.verbose = verbose;
     }
 
     @Override public String toString() {
-      return "ERROR: " + this.error + "\n"
-          + "\t" + this.query.file + ":" + this.query.line + "\n"
-          + "\t" + this.query + "\n";
+      String extra = "";
+      if (this.exception != null && this.verbose) {
+        StringPrintStream str = new StringPrintStream();
+        this.exception.printStackTrace(str.getPrintStream());
+        extra = str + "\n";
+      }
+      return "ERROR: " + this.error
+          + "\n\t" + this.query.file + ":" + this.query.line
+          + "\n\t" + this.query
+          + "\n" + extra;
     }
   }
 
@@ -68,7 +81,7 @@ public class TestStatistics {
   }
 
   public void setIgnored(int n) {
-    this.failed = n;
+    this.ignored = n;
   }
 
   public void add(TestStatistics stats) {
@@ -90,7 +103,7 @@ public class TestStatistics {
     return this.ignored;
   }
 
-  List<FailedTestDescription> failures = new ArrayList<>();
+  final List<FailedTestDescription> failures = new ArrayList<>();
   final boolean stopAtFirstErrror;
 
   public TestStatistics(boolean stopAtFirstError) {
@@ -115,10 +128,10 @@ public class TestStatistics {
     for (FailedTestDescription failure : this.failures) {
       result.append(failure.toString());
     }
-    return "Passed: " + TestStatistics.DF.format(this.passed) + "\n"
-        + "Failed: " + TestStatistics.DF.format(this.failed) + "\n"
-        + "Ignored: " + TestStatistics.DF.format(this.ignored) + "\n"
-        + result;
+    return "Passed: " + TestStatistics.DF.format(this.passed)
+        + "\nFailed: " + TestStatistics.DF.format(this.failed)
+        + "\nIgnored: " + TestStatistics.DF.format(this.ignored)
+        + "\n" + result;
   }
 
   public int totalTests() {

@@ -19,45 +19,53 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
- *
  */
 
-package net.hydromatic.sqllogictest;
+package net.hydromatic.sqllogictest.executors;
 
-import net.hydromatic.sqllogictest.executors.ISqlTestOperation;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-public class SqlTestQuery implements ISqlTestOperation {
-  /**
-   * Query that is executed.
-   */
-  String query;
-  String name;
-  public final String file;
-  int line;
+import java.io.PrintStream;
 
-  public final SqlTestQueryOutputDescription outputDescription;
-
-  public void setName(String name) {
-    this.name = name;
+/**
+ * Utility interface providing some useful casting methods.
+ */
+public interface ICastable {
+  default <T> @Nullable T as(Class<T> clazz) {
+    return ICastable.as(this, clazz, (String) null);
   }
 
-  SqlTestQuery(String file) {
-    this.query = "";
-    this.file = file;
-    this.outputDescription = new SqlTestQueryOutputDescription();
+  static <T> @Nullable T as(Object obj, Class<T> clazz, String s) {
+    try {
+      return clazz.cast(obj);
+    } catch (ClassCastException e) {
+      return null;
+    }
   }
 
-  void setQuery(String query, int line) {
-    this.query = query;
-    this.line = line;
+  default void error(PrintStream err, String message) {
+    err.println(message);
   }
 
-  public String getQuery() {
-    return this.query;
+  default <T> T as(PrintStream err, Class<T> clazz,
+      @Nullable String failureMessage) {
+    T result = this.as(clazz);
+    if (result == null) {
+      if (failureMessage == null) {
+        failureMessage = this + "(" + this.getClass().getName()
+            + ") is not an instance of " + clazz;
+      }
+      this.error(err, failureMessage);
+    }
+    assert result != null;
+    return result;
   }
 
-  @Override public String toString() {
-    return this.query;
+  default <T> T to(PrintStream err, Class<T> clazz) {
+    return this.as(err, clazz, (String) null);
+  }
+
+  default <T> boolean is(Class<T> clazz) {
+    return this.as(clazz) != null;
   }
 }

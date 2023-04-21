@@ -19,5 +19,3 @@
  * SQL Logic Test.
  */
 package net.hydromatic.sqllogictest;
-
-// End package-info.java

@@ -33,7 +33,7 @@ public class Utilities {
     return "'" + other + "'";
   }
 
-  @Nullable public static String getFileExtension(String filename) {
+  public static @Nullable String getFileExtension(String filename) {
     int i = filename.lastIndexOf('.');
     if (i > 0) {
       return filename.substring(i + 1);
@@ -54,8 +54,8 @@ public class Utilities {
 
   public static <T, S> List<S> map(List<T> data, Function<T, S> function) {
     List<S> result = new ArrayList<>(data.size());
-    for (T aData : data) {
-      result.add(function.apply(aData));
+    for (T datum : data) {
+      result.add(function.apply(datum));
     }
     return result;
   }
@@ -63,13 +63,9 @@ public class Utilities {
   public static <T, S> List<S> flatMap(List<T> data,
       Function<T, List<S>> function) {
     List<S> result = new ArrayList<>(data.size());
-    for (T aData : data) {
-      result.addAll(function.apply(aData));
+    for (T datum : data) {
+      result.addAll(function.apply(datum));
     }
     return result;
-  }
-
-  public static String getEmptyString() {
-    return "";
   }
 }

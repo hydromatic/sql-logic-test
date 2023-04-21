@@ -1,7 +1,6 @@
 /*
  * Copyright 2022 VMware, Inc.
  * SPDX-License-Identifier: MIT
- * SPDX-License-Identifier: Apache-2.0
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -33,6 +32,19 @@ import net.hydromatic.sqllogictest.TestStatistics;
  * It is still useful to validate that the test parsing works.
  */
 public class NoExecutor extends SqlSltTestExecutor {
+  NoExecutor(ExecutionOptions options) {
+    super(options);
+  }
+
+  public static class Factory extends ExecutorFactory {
+    public static final Factory INSTANCE = new Factory();
+    private Factory() {}
+
+    @Override public void register(ExecutionOptions execOptions) {
+      execOptions.registerExecutor("none", () -> new NoExecutor(execOptions));
+    }
+  }
+
   @Override public TestStatistics execute(SltTestFile testFile,
       ExecutionOptions options) {
     TestStatistics result = new TestStatistics(options.stopAtFirstError);
@@ -40,7 +52,7 @@ public class NoExecutor extends SqlSltTestExecutor {
     result.setFailed(0);
     result.setIgnored(testFile.getTestCount());
     result.setPassed(0);
-    this.reportTime(testFile.getTestCount());
+    options.message(this.elapsedTime(testFile.getTestCount()), 1);
     return result;
   }
 }
