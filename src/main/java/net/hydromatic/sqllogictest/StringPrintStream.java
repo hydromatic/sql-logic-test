@@ -33,7 +33,7 @@ import java.nio.charset.StandardCharsets;
  */
 public class StringPrintStream {
   PrintStream stream;
-  ByteArrayOutputStream byteStream;
+  final ByteArrayOutputStream byteStream;
   boolean closed = false;
 
   public StringPrintStream() {

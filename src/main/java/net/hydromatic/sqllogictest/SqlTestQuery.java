@@ -53,10 +53,6 @@ public class SqlTestQuery implements ISqlTestOperation {
     this.line = line;
   }
 
-  int getLine() {
-    return this.line;
-  }
-
   public String getQuery() {
     return this.query;
   }

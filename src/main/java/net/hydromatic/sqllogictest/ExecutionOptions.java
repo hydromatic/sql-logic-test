@@ -57,21 +57,16 @@ public class ExecutionOptions {
      */
     final String description;
     /**
-     * True if the argument can be missing.
-     */
-    final boolean optionalArgument;
-    /**
      * Function to execute when option is encountered.
      * Should return 'true' on success.
      */
     final Function<String, Boolean> optionArgProcessor;
 
-    OptionDescription(String option, @Nullable String argName, String description, boolean optionalArgument,
+    OptionDescription(String option, @Nullable String argName, String description,
                       Function<String, Boolean> optionArgProcessor) {
       this.option = option;
       this.argName = argName;
       this.description = description;
-      this.optionalArgument = optionalArgument;
       this.optionArgProcessor = optionArgProcessor;
     }
   }
@@ -80,10 +75,6 @@ public class ExecutionOptions {
    * All the known options.
    */
   final Map<String, OptionDescription> knownOptions;
-  /**
-   * Additional information to be printed as help.
-   */
-  final List<String> additionalUsage;
   /**
    * Order in which the options were registered.
    */
@@ -180,7 +171,6 @@ public class ExecutionOptions {
 
   public ExecutionOptions(boolean exit) {
     this.knownOptions = new HashMap<>();
-    this.additionalUsage = new ArrayList<>();
     this.binaryName = "";
     this.optionOrder = new ArrayList<>();
     this.directories = new ArrayList<>();
@@ -200,7 +190,6 @@ public class ExecutionOptions {
   public boolean stopAtFirstError = false;
   public boolean doNotExecute = false;
   public String executor = "";
-  public boolean ignoreSqlStatus = false;
   public String bugsFile = "";
   public int verbosity = 0;
 
@@ -224,23 +213,21 @@ public class ExecutionOptions {
 
   void registerDefaultOptions() {
     this.registerOption("-h", null, "Show this help message and exit",
-            false, (o) -> false);
-    this.registerOption("-d", "directory", "Directory with SLT tests", false,
+            (o) -> false);
+    this.registerOption("-d", "directory", "Directory with SLT tests",
             (o) -> { this.directory = o; return true; });
     this.registerOption("-i", null, "Install the SLT tests if the directory does not exist",
-            false, (o) -> { this.install = true; return true; });
+            (o) -> { this.install = true; return true; });
     this.registerOption("-x", null, "Stop at the first encountered query error",
-            false, o -> { this.stopAtFirstError = true; return true; });
+            o -> { this.stopAtFirstError = true; return true; });
     this.registerOption("-n", null, "Do not execute, just parse the test files",
-            false, o -> { this.doNotExecute = true; return true; });
+            o -> { this.doNotExecute = true; return true; });
     this.registerOption("-e", "executor", "Executor to use",
-            false, this::setExecutor);
-    this.registerOption("-s", null, "Ignore the status of SQL commands executed",
-            false, o -> { this.ignoreSqlStatus = true; return true; });
+            this::setExecutor);
     this.registerOption("-b", "filename", "Load a list of buggy commands to skip from this file",
-            false, this::setBugsFile);
+            this::setBugsFile);
     this.registerOption("-v", null, "Increase verbosity",
-            false, o -> { this.verbosity++; return true; });
+            o -> { this.verbosity++; return true; });
   }
 
   public void registerExecutor(String executorName, Supplier<SqlSLTTestExecutor> executor) {
@@ -271,8 +258,8 @@ public class ExecutionOptions {
   }
 
   public void registerOption(String option, @Nullable String argName, String description,
-                      boolean optionalArgument, Function<String, Boolean> optionArgProcessor) {
-    OptionDescription o = new OptionDescription(option, argName, description, optionalArgument, optionArgProcessor);
+                             Function<String, Boolean> optionArgProcessor) {
+    OptionDescription o = new OptionDescription(option, argName, description, optionArgProcessor);
     if (this.knownOptions.containsKey(option)) {
       this.error("Option " + Utilities.singleQuote(option) + " already registered");
       return;
@@ -281,10 +268,6 @@ public class ExecutionOptions {
     this.knownOptions.put(option, o);
   }
 
-  void registerUsage(String usage) {
-    this.additionalUsage.add(usage);
-  }
-  
   void error(String message) {
     System.err.println(message);
   }
@@ -334,14 +317,12 @@ public class ExecutionOptions {
         if (option == null) {
           return this.abort("Unknown option " + Utilities.singleQuote(opt));
         }
-        if ((option.optionalArgument) && (arg == null || arg.isEmpty()))
-          arg = null;
       }
 
       if (option == null) {
         this.directories.add(opt);
       } else {
-        if (option.argName != null && arg == null && !(option.optionalArgument)) {
+        if (option.argName != null && arg == null) {
           if (i == argv.length - 1) {
             return this.abort("Option " + Utilities.singleQuote(opt) +
                     " is missing required argument " + option.argName);
@@ -377,16 +358,11 @@ public class ExecutionOptions {
       int len = o.length();
       System.out.print(option.option);
       if (option.argName != null) {
-        if (option.optionalArgument) {
-          System.out.print("[=" + option.argName + "]");
-          len += 3 + option.argName.length();
-        } else {
-          System.out.print(" " + option.argName);
-          len += 1 + option.argName.length();
-        }
+        System.out.print(" " + option.argName);
+        len += 1 + option.argName.length();
       }
 
-      for (String line: option.description.split("\n")) {
+      for (String line : option.description.split("\n")) {
         for (int i = 0; i < labelLen - len; i++)
           System.out.print(" ");
         System.out.println(line);
@@ -395,11 +371,8 @@ public class ExecutionOptions {
     }
 
     System.out.println("Registered executors:");
-    for (String e: this.executorFactories.keySet()) {
+    for (String e : this.executorFactories.keySet()) {
       System.out.println("\t" + e);
     }
-
-    for (String m : this.additionalUsage)
-      System.out.println(m);
   }
 }

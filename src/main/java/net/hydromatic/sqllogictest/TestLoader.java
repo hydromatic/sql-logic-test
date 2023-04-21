@@ -66,7 +66,7 @@ class TestLoader extends SimpleFileVisitor<Path> {
                 try {
                     TestStatistics stats = executor.execute(test, options);
                     this.statistics.add(stats);
-                } catch (IOException | SQLException | NoSuchAlgorithmException ex) {
+                } catch (SQLException | NoSuchAlgorithmException ex) {
                     // Can't add exceptions to the overridden method visitFile
                     throw new IllegalArgumentException(ex);
                 }

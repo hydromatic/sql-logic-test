@@ -37,7 +37,7 @@ public class NoExecutor extends SqlSLTTestExecutor {
   }
 
   public static class Factory extends ExecutorFactory {
-    public static Factory INSTANCE = new Factory();
+    public static final Factory INSTANCE = new Factory();
     private Factory() {}
 
     @Override

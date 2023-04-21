@@ -102,7 +102,7 @@ public class TestStatistics {
     return this.ignored;
   }
 
-  List<FailedTestDescription> failures = new ArrayList<>();
+  final List<FailedTestDescription> failures = new ArrayList<>();
   final boolean stopAtFirstErrror;
 
   public TestStatistics(boolean stopAtFirstError) {

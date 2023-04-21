@@ -13,7 +13,7 @@ import java.util.Set;
  */
 public class HSQLExecutor extends JDBCExecutor {
     public static class Factory extends ExecutorFactory {
-        public static HSQLExecutor.Factory INSTANCE = new HSQLExecutor.Factory();
+        public static final HSQLExecutor.Factory INSTANCE = new HSQLExecutor.Factory();
         private Factory() {}
 
         @Override
