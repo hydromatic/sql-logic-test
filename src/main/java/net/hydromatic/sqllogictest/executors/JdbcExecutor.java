@@ -155,7 +155,8 @@ public abstract class JdbcExecutor extends SqlSltTestExecutor {
   /**
    * Run a query.
    * @param query       Query to execute.
-   * @param statistics  Execution statistics recording the result of the query execution.
+   * @param statistics  Execution statistics recording the result of
+   *                    the query execution.
    * @return            True if we need to stop executing.
    */
   boolean query(SqlTestQuery query, TestStatistics statistics)
@@ -169,7 +170,8 @@ public abstract class JdbcExecutor extends SqlSltTestExecutor {
     }
     try (Statement stmt = this.connection.createStatement()) {
       try (ResultSet resultSet = stmt.executeQuery(query.getQuery())) {
-        boolean result = this.validate(query, resultSet, query.outputDescription, statistics);
+        boolean result = this.validate(query, resultSet,
+                query.outputDescription, statistics);
         options.message(statistics.testsRun() + ": " + query.getQuery(), 2);
         return result;
       }

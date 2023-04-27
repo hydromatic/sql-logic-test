@@ -102,11 +102,13 @@ public class SqlLogicTestTest {
     assertThat(res.out, outLines[3], is("Ignored: 5,464,410"));
   }
 
-  /** Test that runs hsqldb on a file which produces errors and stops at the first error. */
+  /** Test that runs hsqldb on a file which produces errors and stops
+   * at the first error. */
   @Test void testRunWithErrorsStop() throws IOException {
     // Triggers https://sourceforge.net/p/hsqldb/bugs/1680/
     // Will need to be updated when this bug is closed
-    Output res = launchSqlLogicTest("-e", "hsql", "-x", "random/select/slt_good_12.test");
+    Output res = launchSqlLogicTest("-e", "hsql", "-x",
+            "random/select/slt_good_12.test");
     String[] outLines = res.out.split("\n");
     assertThat(res.err, is(""));
     assertThat(outLines.length, is(8));
@@ -119,7 +121,8 @@ public class SqlLogicTestTest {
 
   /** Test that runs hsqldb on a file which produces many errors. */
   @Test void testRunWithErrors() throws IOException {
-    Output res = launchSqlLogicTest("-e", "hsql", "random/select/slt_good_12.test");
+    Output res = launchSqlLogicTest("-e", "hsql",
+            "random/select/slt_good_12.test");
     String[] outLines = res.out.split("\n");
     assertThat(res.err, is(""));
     assertThat(outLines.length, is(4973));

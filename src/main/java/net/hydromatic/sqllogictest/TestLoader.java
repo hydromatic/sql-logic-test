@@ -70,8 +70,8 @@ class TestLoader extends SimpleFileVisitor<Path> {
             System.out.println(stats.failed + " failures");
           }
           this.statistics.add(stats);
-          if (this.statistics.stopAtFirstErrror &&
-                  !this.statistics.failures.isEmpty()) {
+          if (this.statistics.stopAtFirstErrror
+                  && !this.statistics.failures.isEmpty()) {
             return FileVisitResult.TERMINATE;
           }
         } catch (SQLException | NoSuchAlgorithmException ex) {
