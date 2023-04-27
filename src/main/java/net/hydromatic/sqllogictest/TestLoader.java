@@ -66,7 +66,14 @@ class TestLoader extends SimpleFileVisitor<Path> {
       if (test != null) {
         try {
           TestStatistics stats = executor.execute(test, options);
+          if (!stats.failures.isEmpty() && options.verbosity > 0) {
+            System.out.println(stats.failed + " failures");
+          }
           this.statistics.add(stats);
+          if (this.statistics.stopAtFirstErrror &&
+                  !this.statistics.failures.isEmpty()) {
+            return FileVisitResult.TERMINATE;
+          }
         } catch (SQLException | NoSuchAlgorithmException ex) {
           // Can't add exceptions to the overridden method visitFile
           throw new IllegalArgumentException(ex);
