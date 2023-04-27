@@ -102,6 +102,7 @@ public class SqlLogicTestTest {
     assertThat(res.out, outLines[3], is("Ignored: 5,464,410"));
   }
 
+  /** Test that runs hsqldb on a file which produces errors and stops at the first error. */
   @Test void testRunWithErrorsStop() throws IOException {
     // Triggers https://sourceforge.net/p/hsqldb/bugs/1680/
     // Will need to be updated when this bug is closed
@@ -116,6 +117,7 @@ public class SqlLogicTestTest {
     assertThat(res.out, outLines[5], is("ERROR: unexpected token: -"));
   }
 
+  /** Test that runs hsqldb on a file which produces many errors. */
   @Test void testRunWithErrors() throws IOException {
     Output res = launchSqlLogicTest("-e", "hsql", "random/select/slt_good_12.test");
     String[] outLines = res.out.split("\n");
@@ -135,6 +137,16 @@ public class SqlLogicTestTest {
     assertThat(res.out, outLines[1], is("Passed: 1,000"));
     assertThat(res.out, outLines[2], is("Failed: 0"));
     assertThat(res.out, outLines[3], is("Ignored: 0"));
+  }
+
+  @Test void testRunSingleTestFileNFlag() throws IOException {
+    Output res = launchSqlLogicTest("-e", "hsql", "-n", "select1.test");
+    String[] outLines = res.out.split("\n");
+    assertThat(res.err, is(""));
+    assertThat(outLines.length, is(4));
+    assertThat(res.out, outLines[1], is("Passed: 0"));
+    assertThat(res.out, outLines[2], is("Failed: 0"));
+    assertThat(res.out, outLines[3], is("Ignored: 1,000"));
   }
 
   @Test void testRunMultipleTestFiles() throws IOException {
