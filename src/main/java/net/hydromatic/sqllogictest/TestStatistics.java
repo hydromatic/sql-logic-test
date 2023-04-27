@@ -109,9 +109,13 @@ public class TestStatistics {
     this.stopAtFirstErrror = stopAtFirstError;
   }
 
-  public void addFailure(FailedTestDescription failure) {
+  /**
+   * Add a new failure; return 'true' if we need to stop executing.
+   */
+  public boolean addFailure(FailedTestDescription failure) {
     this.failures.add(failure);
     this.failed++;
+    return this.stopAtFirstErrror;
   }
 
   public int testsRun() {

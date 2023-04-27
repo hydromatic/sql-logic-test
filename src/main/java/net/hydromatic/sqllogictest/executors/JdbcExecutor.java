@@ -152,21 +152,31 @@ public abstract class JdbcExecutor extends SqlSltTestExecutor {
     this.statementsExecuted++;
   }
 
-  void query(SqlTestQuery query, TestStatistics statistics)
+  /**
+   * Run a query.
+   * @param query       Query to execute.
+   * @param statistics  Execution statistics recording the result of
+   *                    the query execution.
+   * @return            True if we need to stop executing.
+   */
+  boolean query(SqlTestQuery query, TestStatistics statistics)
       throws SQLException, NoSuchAlgorithmException {
     assert this.connection != null;
     if (this.buggyOperations.contains(query.getQuery())
         || this.options.doNotExecute) {
       statistics.incIgnored();
       options.message("Skipping " + query.getQuery(), 2);
-      return;
+      return false;
     }
     try (Statement stmt = this.connection.createStatement()) {
       try (ResultSet resultSet = stmt.executeQuery(query.getQuery())) {
-        this.validate(query, resultSet, query.outputDescription, statistics);
+        boolean result =
+            this.validate(query, resultSet, query.outputDescription,
+                statistics);
+        options.message(statistics.testsRun() + ": " + query.getQuery(), 2);
+        return result;
       }
     }
-    options.message(statistics.testsRun() + ": " + query.getQuery(), 2);
   }
 
   /**
@@ -242,8 +252,12 @@ public abstract class JdbcExecutor extends SqlSltTestExecutor {
     }
   }
 
+  /**
+   * Validate the result of the execution of a query.
+   * Returns 'true' if execution has to stop due to a validation failure.
+   */
   @SuppressWarnings("java:S4790")  // MD5 checksum
-  void validate(SqlTestQuery query, ResultSet rs,
+  boolean validate(SqlTestQuery query, ResultSet rs,
       SqlTestQueryOutputDescription description,
       TestStatistics statistics)
       throws SQLException, NoSuchAlgorithmException {
@@ -255,22 +269,24 @@ public abstract class JdbcExecutor extends SqlSltTestExecutor {
     }
     if (description.getValueCount()
         != rows.size() * description.columnTypes.length()) {
-      statistics.addFailure(
+      return statistics.addFailure(
           new TestStatistics.FailedTestDescription(query,
               "Expected " + description.getValueCount() + " rows, got "
                   + rows.size() * description.columnTypes.length(),
               null, options.verbosity > 0));
-      return;
     }
     rows.sort(description.getOrder());
     if (description.getQueryResults() != null) {
       String r = rows.toString();
       String q = String.join("\n", description.getQueryResults());
       if (!r.equals(q)) {
-        statistics.addFailure(new TestStatistics.FailedTestDescription(
-            query, "Output differs: computed\n" + r + "\nExpected:\n" + q,
-            null, options.verbosity > 0));
-        return;
+        return statistics.addFailure(
+            new TestStatistics.FailedTestDescription(query,
+                "Output differs: computed\n"
+                    + r
+                    + "\nExpected:\n"
+                    + q,
+                null, options.verbosity > 0));
       }
     }
     if (description.hash != null) {
@@ -282,13 +298,14 @@ public abstract class JdbcExecutor extends SqlSltTestExecutor {
       byte[] digest = md.digest();
       String hash = Utilities.toHex(digest);
       if (!description.hash.equals(hash)) {
-        statistics.addFailure(new TestStatistics.FailedTestDescription(
-            query, "Hash of data does not match expected value", null,
-            options.verbosity > 0));
-        return;
+        return statistics.addFailure(
+            new TestStatistics.FailedTestDescription(query,
+                "Hash of data does not match expected value", null,
+                options.verbosity > 0));
       }
     }
     statistics.incPassed();
+    return false;
   }
 
   /**
@@ -361,11 +378,16 @@ public abstract class JdbcExecutor extends SqlSltTestExecutor {
         }
       } else {
         SqlTestQuery query = operation.to(options.err, SqlTestQuery.class);
+        boolean stop;
         try {
-          this.query(query, result);
+          stop = this.query(query, result);
         } catch (SQLException ex) {
-          result.addFailure(new TestStatistics.FailedTestDescription(
-              query, ex.getMessage(), ex, options.verbosity > 0));
+          stop = result.addFailure(
+              new TestStatistics.FailedTestDescription(query,
+                  ex.getMessage(), ex, options.verbosity > 0));
+        }
+        if (stop) {
+          break;
         }
       }
     }
