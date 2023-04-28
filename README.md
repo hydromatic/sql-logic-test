@@ -92,6 +92,12 @@ because it triggers an internal database, or because it produces incorrect
 results.  All the queries have been validated with sqlite, so a failure
 is very likely to be a true bug in the tested engine.
 
+## Listing all available tests
+
+You can achieve this using the following invocation:
+
+`slt -e none -v`
+
 ## How tests are executed
 
 This program parses SqlLogicTest files and delegates their execution to

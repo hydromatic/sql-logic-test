@@ -28,7 +28,7 @@ import net.hydromatic.sqllogictest.SltTestFile;
 import net.hydromatic.sqllogictest.SqlTestQuery;
 import net.hydromatic.sqllogictest.SqlTestQueryOutputDescription;
 import net.hydromatic.sqllogictest.TestStatistics;
-import net.hydromatic.sqllogictest.Utilities;
+import net.hydromatic.sqllogictest.util.Utilities;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 

@@ -22,8 +22,11 @@
  */
 package net.hydromatic.sqllogictest;
 
+import net.hydromatic.sqllogictest.util.StringPrintStream;
+
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.io.PrintStream;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -46,16 +49,16 @@ public class TestStatistics {
     }
 
     @Override public String toString() {
-      String extra = "";
+      String result = "ERROR: " + this.error
+              + System.lineSeparator() + "\t" + this.query.file
+              + ":" + this.query.line
+              + System.lineSeparator()  + "\t" + this.query;
       if (this.exception != null && this.verbose) {
         StringPrintStream str = new StringPrintStream();
         this.exception.printStackTrace(str.getPrintStream());
-        extra = str + "\n";
+        result += System.lineSeparator() + str;
       }
-      return "ERROR: " + this.error
-          + "\n\t" + this.query.file + ":" + this.query.line
-          + "\n\t" + this.query
-          + "\n" + extra;
+      return result;
     }
   }
 
@@ -122,19 +125,17 @@ public class TestStatistics {
     return this.passed + this.ignored + this.failed;
   }
 
-  @Override public String toString() {
-    StringBuilder result = new StringBuilder();
+  public void printStatistics(PrintStream out) {
+    out.println("Passed: " + TestStatistics.DF.format(this.passed));
+    out.println("Failed: " + TestStatistics.DF.format(this.failed));
+    out.println("Ignored: " + TestStatistics.DF.format(this.ignored));
     if (!this.failures.isEmpty()) {
-      result.append(this.failures.size())
-          .append(" failures:\n");
+      out.print(this.failures.size());
+      out.println(" failures:");
     }
     for (FailedTestDescription failure : this.failures) {
-      result.append(failure.toString());
+      out.println(failure.toString());
     }
-    return "Passed: " + TestStatistics.DF.format(this.passed)
-        + "\nFailed: " + TestStatistics.DF.format(this.failed)
-        + "\nIgnored: " + TestStatistics.DF.format(this.ignored)
-        + "\n" + result;
   }
 
   public int totalTests() {

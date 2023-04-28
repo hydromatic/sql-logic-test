@@ -23,6 +23,7 @@
 package net.hydromatic.sqllogictest;
 
 import net.hydromatic.sqllogictest.executors.SqlSltTestExecutor;
+import net.hydromatic.sqllogictest.util.Utilities;
 
 import java.nio.file.FileVisitResult;
 import java.nio.file.Path;

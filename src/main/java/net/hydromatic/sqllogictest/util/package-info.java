@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 VMware, Inc.
+ * Copyright 2023 VMware, Inc.
  * SPDX-License-Identifier: MIT
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -20,11 +20,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package net.hydromatic.sqllogictest.executors;
 
-import net.hydromatic.sqllogictest.util.ICastable;
+/** Various utility classes */
+package net.hydromatic.sqllogictest.util;
 
-/**
- * Base interface for SqlLogicTest operations: either statements or queries.
- */
-public interface ISqlTestOperation extends ICastable { }

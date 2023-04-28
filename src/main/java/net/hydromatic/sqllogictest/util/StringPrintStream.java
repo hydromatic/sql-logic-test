@@ -20,7 +20,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package net.hydromatic.sqllogictest;
+package net.hydromatic.sqllogictest.util;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
