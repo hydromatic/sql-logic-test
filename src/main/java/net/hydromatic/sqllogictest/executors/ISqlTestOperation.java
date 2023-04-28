@@ -22,6 +22,8 @@
  */
 package net.hydromatic.sqllogictest.executors;
 
+import net.hydromatic.sqllogictest.ICastable;
+
 /**
  * Base interface for SqlLogicTest operations: either statements or queries.
  */

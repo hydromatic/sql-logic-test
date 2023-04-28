@@ -22,6 +22,8 @@
  */
 package net.hydromatic.sqllogictest.executors;
 
+import net.hydromatic.sqllogictest.ICastable;
+
 import java.text.DecimalFormat;
 import java.util.HashSet;
 import java.util.Set;

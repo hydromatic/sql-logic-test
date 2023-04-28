@@ -70,7 +70,7 @@ public class Main {
       Files.walkFileTree(path, loader);
     }
     out.println("Files that could not be not parsed: " + loader.errors);
-    out.println(loader.statistics);
+    loader.statistics.printStatistics(out);
     return 0;
   }
 }
