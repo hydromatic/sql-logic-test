@@ -21,12 +21,6 @@
  * SOFTWARE.
  */
 
-/**
- * Various Executor implementations.
- *
- * @see net.hydromatic.sqllogictest.executors.SqlTestExecutor
- */
-
-/* Various utility classes */
+/** Various utility classes */
 package net.hydromatic.sqllogictest.util;
 
