@@ -22,6 +22,7 @@
  */
 package net.hydromatic.sqllogictest;
 
+import net.hydromatic.sqllogictest.util.StringPrintStream;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.PrintStream;

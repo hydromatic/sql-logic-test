@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 VMware, Inc.
+ * Copyright 2023 VMware, Inc.
  * SPDX-License-Identifier: MIT
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -20,44 +20,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package net.hydromatic.sqllogictest;
-
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
 
 /**
- * A PrintStream that writes do a String.
+ * Various Executor implementations.
+ *
+ * @see net.hydromatic.sqllogictest.executors.SqlTestExecutor
  */
-public class StringPrintStream {
-  PrintStream stream;
-  final ByteArrayOutputStream byteStream;
-  boolean closed = false;
 
-  public StringPrintStream() {
-    this.byteStream = new ByteArrayOutputStream();
-    try {
-      this.stream =
-          new PrintStream(this.byteStream, true, StandardCharsets.UTF_8.name());
-    } catch (UnsupportedEncodingException e) {
-      throw new RuntimeException(e);
-    }
-  }
+/* Various utility classes */
+package net.hydromatic.sqllogictest.util;
 
-  public PrintStream getPrintStream() {
-    return this.stream;
-  }
-
-  /**
-   * Get the data written so far.  Once this is done the stream is
-   * closed and can't be used anymore.
-   */
-  @Override public String toString() {
-    if (!this.closed) {
-      this.stream.close();
-    }
-    this.closed = true;
-    return this.byteStream.toString();
-  }
-}

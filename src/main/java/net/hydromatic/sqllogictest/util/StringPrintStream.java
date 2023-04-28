@@ -20,51 +20,44 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package net.hydromatic.sqllogictest;
+package net.hydromatic.sqllogictest.util;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
-
+import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 
 /**
- * Utility interface providing some useful casting methods.
+ * A PrintStream that writes do a String.
  */
-public interface ICastable {
-  default <T> @Nullable T as(Class<T> clazz) {
-    return ICastable.as(this, clazz, (String) null);
-  }
+public class StringPrintStream {
+  PrintStream stream;
+  final ByteArrayOutputStream byteStream;
+  boolean closed = false;
 
-  static <T> @Nullable T as(Object obj, Class<T> clazz, String s) {
+  public StringPrintStream() {
+    this.byteStream = new ByteArrayOutputStream();
     try {
-      return clazz.cast(obj);
-    } catch (ClassCastException e) {
-      return null;
+      this.stream =
+          new PrintStream(this.byteStream, true, StandardCharsets.UTF_8.name());
+    } catch (UnsupportedEncodingException e) {
+      throw new RuntimeException(e);
     }
   }
 
-  default void error(PrintStream err, String message) {
-    err.println(message);
+  public PrintStream getPrintStream() {
+    return this.stream;
   }
 
-  default <T> T as(PrintStream err, Class<T> clazz,
-      @Nullable String failureMessage) {
-    T result = this.as(clazz);
-    if (result == null) {
-      if (failureMessage == null) {
-        failureMessage = this + "(" + this.getClass().getName()
-            + ") is not an instance of " + clazz;
-      }
-      this.error(err, failureMessage);
+  /**
+   * Get the data written so far.  Once this is done the stream is
+   * closed and can't be used anymore.
+   */
+  @Override public String toString() {
+    if (!this.closed) {
+      this.stream.close();
     }
-    assert result != null;
-    return result;
-  }
-
-  default <T> T to(PrintStream err, Class<T> clazz) {
-    return this.as(err, clazz, (String) null);
-  }
-
-  default <T> boolean is(Class<T> clazz) {
-    return this.as(clazz) != null;
+    this.closed = true;
+    return this.byteStream.toString();
   }
 }

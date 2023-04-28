@@ -22,7 +22,7 @@
  */
 package net.hydromatic.sqllogictest.executors;
 
-import net.hydromatic.sqllogictest.ICastable;
+import net.hydromatic.sqllogictest.util.ICastable;
 
 import java.text.DecimalFormat;
 import java.util.HashSet;
