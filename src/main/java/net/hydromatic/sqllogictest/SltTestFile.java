@@ -23,8 +23,8 @@
 package net.hydromatic.sqllogictest;
 
 import net.hydromatic.sqllogictest.executors.ISqlTestOperation;
-
 import net.hydromatic.sqllogictest.util.Utilities;
+
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.BufferedReader;

@@ -23,6 +23,7 @@
 package net.hydromatic.sqllogictest;
 
 import net.hydromatic.sqllogictest.util.StringPrintStream;
+
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.PrintStream;
@@ -49,7 +50,8 @@ public class TestStatistics {
 
     @Override public String toString() {
       String result = "ERROR: " + this.error
-              + System.lineSeparator() + "\t" + this.query.file + ":" + this.query.line
+              + System.lineSeparator() + "\t" + this.query.file
+              + ":" + this.query.line
               + System.lineSeparator()  + "\t" + this.query;
       if (this.exception != null && this.verbose) {
         StringPrintStream str = new StringPrintStream();
