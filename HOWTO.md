@@ -36,12 +36,15 @@ Update the [release history](HISTORY.md),
 the version number at the bottom of [README](README.md),
 and the copyright date in [NOTICE](NOTICE).
 
+Use JDK 11.
+
 ```
+export GPG_TTY=$(tty)
+read -s GPG_PASSPHRASE
 ./mvnw clean
 ./mvnw release:clean
 git clean -nx
 git clean -fx
-read -s GPG_PASSPHRASE
 ./mvnw -Prelease -Dgpg.passphrase=${GPG_PASSPHRASE} release:prepare
 ./mvnw -Prelease -Dgpg.passphrase=${GPG_PASSPHRASE} release:perform
 ```
