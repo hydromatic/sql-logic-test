@@ -54,7 +54,13 @@ public class ExecutionOptions {
    * Order in which the options were registered.
    */
   final List<String> optionOrder;
+  /**
+   * Stream used to display messages.
+   */
   public final PrintStream out;
+  /**
+   * Stream used to display errors.
+   */
   public final PrintStream err;
   /**
    * Name of the current binary.
@@ -99,7 +105,10 @@ public class ExecutionOptions {
     return bugs;
   }
 
-  void setBinaryName(String binaryName) {
+  /**
+   * Set the name displayed for the current program when printing usage.
+   */
+  public void setBinaryName(String binaryName) {
     this.binaryName = binaryName;
   }
 
@@ -118,33 +127,9 @@ public class ExecutionOptions {
     return this.abort(this.exit, message);
   }
 
-/*
-  JdbcExecutor jdbcExecutor(HashSet<String> sltBugs) {
-    JdbcExecutor jdbc = new JdbcExecutor(this.jdbcConnectionString());
-    jdbc.avoid(sltBugs);
-    jdbc.setValidateStatus(this.validateStatus);
-    return jdbc;
-  }
-
-  SqlSltTestExecutor getExecutor() throws IOException, SQLException {
-    HashSet<String> sltBugs = new HashSet<>();
-    if (this.bugsFile != null) {
-      sltBugs = this.readBugsFile(this.bugsFile);
-    }
-
-    switch (this.executor) {
-    case "none":
-      return new NoExecutor();
-    case "JDBC": {
-      return this.jdbcExecutor(sltBugs);
-    }
-    default:
-      // unreachable
-      throw new RuntimeException("Unknown executor: " + this.executor);
-    }
-  }
-*/
-
+  /**
+   * Get the list of directories or files that contain tests to be executed.
+   */
   public List<String> getDirectories() {
     if (this.directories.isEmpty()) {
       this.directories.add(".");  // This means "everything"
@@ -152,6 +137,14 @@ public class ExecutionOptions {
     return this.directories;
   }
 
+  /**
+   * Create some uninitilized ExecutionOptions.
+   * Calling 'parse' will initialize the options.
+   * @param exit  If true call System.exit on error,
+   *              otherwise just return a non-zero value.
+   * @param out   Stream used for output.
+   * @param err   Stream used for errors.
+   */
   public ExecutionOptions(boolean exit, PrintStream out, PrintStream err) {
     this.exit = exit;
     this.out = out;
@@ -164,10 +157,26 @@ public class ExecutionOptions {
     this.registerDefaultOptions();
   }
 
+  /**
+   * If true execution stops at the first encountered error.
+   */
   public boolean stopAtFirstError = false;
+  /**
+   * If true tests are not executed.
+   */
   public boolean doNotExecute = false;
+  /**
+   * Name of the test executor to invoke.
+   */
   public String executor = "";
+  /**
+   * Optional name of the file that contains statements and queries that are
+   * expected to fail.
+   */
   public String bugsFile = "";
+  /**
+   * A higher value causes execution to display more information.
+   */
   public int verbosity = 0;
 
   boolean setExecutor(String executor) {
@@ -212,6 +221,11 @@ public class ExecutionOptions {
         });
   }
 
+  /**
+   * Register a new executor.
+   * @param executorName  Name that identifies the executor on the command-line.
+   * @param executor      Executor that can run tests.
+   */
   public void registerExecutor(String executorName,
         Supplier<SqlSltTestExecutor> executor) {
     if (this.executorFactories.containsKey(executorName)) {
@@ -221,6 +235,9 @@ public class ExecutionOptions {
     this.executorFactories.put(executorName, executor);
   }
 
+  /**
+   * Get the executor indicated by the command-line options.
+   */
   public @Nullable SqlSltTestExecutor getExecutor() {
     if (this.executor == null || this.executor.isEmpty()) {
       this.abort("Please supply an executor name using the -e flag");
@@ -240,6 +257,16 @@ public class ExecutionOptions {
     return supplier.get();
   }
 
+  /**
+   * Register a new command-line options.
+   * @param option              String used to indicate option on the
+   *                            command-line.
+   * @param argName             Name of option argument; null if no argument.
+   * @param description         Description of this option.
+   * @param optionArgProcessor  Function invoked when option is supplied.  The
+   *                            function should return 'true' for successful
+   *                            option processing, and 'false' on error.
+   */
   public void registerOption(String option, @Nullable String argName,
       String description, Function<String, Boolean> optionArgProcessor) {
     OptionDescription o =
@@ -257,6 +284,9 @@ public class ExecutionOptions {
     err.println(message);
   }
 
+  /**
+   * Function used to display an error message on the screen.
+   */
   public void error(Throwable ex) {
     err.println("EXCEPTION: " + ex.getMessage());
   }
@@ -276,7 +306,7 @@ public class ExecutionOptions {
    * Parse command-line arguments.
    * Returns 0 on success.
    */
-  int parse(String... argv) {
+  public int parse(String... argv) {
     if (argv.length == 0) {
       return this.abort("No arguments to process");
     }

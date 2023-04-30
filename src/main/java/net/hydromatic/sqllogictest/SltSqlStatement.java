@@ -24,10 +24,24 @@ package net.hydromatic.sqllogictest;
 
 import net.hydromatic.sqllogictest.executors.ISqlTestOperation;
 
+/**
+ * Encapsulates a DDL statement from a test file.
+ */
 public class SltSqlStatement implements ISqlTestOperation {
+  /**
+   * Statement to execute.
+   */
   public final String statement;
+  /**
+   * True if the statement should execute without error.
+   */
   public final boolean shouldPass;
 
+  /**
+   * Create a representation for a SQL statement.
+   * @param statement   Statement to execute.
+   * @param shouldPass  If 'false' the statement is supposed to return an error.
+   */
   public SltSqlStatement(String statement, boolean shouldPass) {
     this.statement = statement;
     this.shouldPass = shouldPass;

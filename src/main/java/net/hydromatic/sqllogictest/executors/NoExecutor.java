@@ -39,6 +39,10 @@ public class NoExecutor extends SqlSltTestExecutor {
     public static final Factory INSTANCE = new Factory();
     private Factory() {}
 
+    /**
+     * Register the NoExecutor with the execution options.
+     * It can be specified using the "-e none" option.
+     */
     @Override public void register(ExecutionOptions execOptions) {
       execOptions.registerExecutor("none", () -> new NoExecutor(execOptions));
     }

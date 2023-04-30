@@ -27,11 +27,27 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A description of the output expected from a test query.
+ */
 public class SqlTestQueryOutputDescription {
-  // These correspond directly to SLT strings.
+  /**
+   * How the results of the query have to be sorted prior to a comparison.
+   */
   public enum SortOrder {
+    // These correspond directly to SLT strings.
+    /**
+     * No sorting required.
+     * Output is produced by a query with an ORDER BY clause.
+     */
     NONE,
+    /**
+     * Sort on rows.
+     */
     ROW,
+    /**
+     * Sort each individual value.
+     */
     VALUE
   }
 
@@ -40,6 +56,9 @@ public class SqlTestQueryOutputDescription {
    * Encoded types of columns expected in result.
    */
   public @Nullable String columnTypes;
+  /**
+   * MD5 checksum of the canonicalized query output.
+   */
   public @Nullable String hash;
   /**
    * How results are sorted.
@@ -47,6 +66,9 @@ public class SqlTestQueryOutputDescription {
   SortOrder order;
   @Nullable List<String> queryResults;
 
+  /**
+   * Create a description of the output of a query.
+   */
   public SqlTestQueryOutputDescription() {
     this.columnTypes = null;
     this.valueCount = 0;
@@ -55,23 +77,41 @@ public class SqlTestQueryOutputDescription {
     this.order = SortOrder.NONE;
   }
 
+  /**
+   * @return A description of how to sort the output
+   * of the query for comparing it with the expected output.
+   */
   public SortOrder getOrder() {
     return this.order;
   }
 
+  /**
+   * @return The list of results produced by the query if they appear in
+   * the test file.  Some query outputs are instead described through
+   * checksums.
+   */
   @Nullable
   public List<String> getQueryResults() {
     return this.queryResults;
   }
 
+  /**
+   * @return The number of values produced by the query.
+   */
   public int getValueCount() {
     return this.valueCount;
   }
 
+  /**
+   * Initialize the results to empty.
+   */
   public void clearResults() {
     this.queryResults = new ArrayList<>();
   }
 
+  /**
+   * Add one more line to the list of expected results.
+   */
   public void addResultLine(String line) {
     if (this.queryResults == null) {
       throw new RuntimeException("queryResults were not initialized");
@@ -128,15 +168,23 @@ public class SqlTestQueryOutputDescription {
     return null;
   }
 
+  /**
+   * Set the MD5 checksum expected from the canonicalized
+   * query result.
+   */
   public void setHash(String hash) {
     this.hash = hash;
   }
 
+  /**
+   * Set the number of values expected to be produced by the query.
+   */
   public void setValueCount(int values) {
     this.valueCount = values;
   }
 
   /**
+   * @return The expected number of rows produced by the query.
    * Return -1 if the output size is not known.
    */
   public int getExpectedOutputSize() {

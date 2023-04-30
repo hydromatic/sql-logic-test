@@ -35,6 +35,9 @@ public class StringPrintStream {
   final ByteArrayOutputStream byteStream;
   boolean closed = false;
 
+  /**
+   * Create a new object that prints to a string.
+   */
   public StringPrintStream() {
     this.byteStream = new ByteArrayOutputStream();
     try {
@@ -45,6 +48,9 @@ public class StringPrintStream {
     }
   }
 
+  /**
+   * Get the stream that is being printed to.
+   */
   public PrintStream getPrintStream() {
     return this.stream;
   }

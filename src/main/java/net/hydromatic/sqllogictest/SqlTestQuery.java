@@ -24,17 +24,36 @@ package net.hydromatic.sqllogictest;
 
 import net.hydromatic.sqllogictest.executors.ISqlTestOperation;
 
+/**
+ * Represents a query in a test.
+ */
 public class SqlTestQuery implements ISqlTestOperation {
   /**
    * Query that is executed.
    */
   String query;
+  /**
+   * Some queries have optional names.
+   */
   String name;
+  /**
+   * The name of the file containing the query.
+   */
   public final String file;
+  /**
+   * The line number in the file where the query starts.
+   */
   int line;
-
+  /**
+   * Description of the output expected from the query.
+   */
   public final SqlTestQueryOutputDescription outputDescription;
 
+  /**
+   * In test files some queries are named.
+   * This helps e.g., identify multiple queries in different dialects
+   * that are mutually exclusive.
+   */
   public void setName(String name) {
     this.name = name;
   }
@@ -50,6 +69,9 @@ public class SqlTestQuery implements ISqlTestOperation {
     this.line = line;
   }
 
+  /**
+   * @return The SQL query to execute.
+   */
   public String getQuery() {
     return this.query;
   }

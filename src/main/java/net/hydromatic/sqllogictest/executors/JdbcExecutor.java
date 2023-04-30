@@ -45,16 +45,28 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+/**
+ * Base class for tests executors that use a JDBC connection
+ * to execute tests.
+ */
 @SuppressWarnings({"SqlDialectInspection", "SqlNoDataSourceInspection"})
 public abstract class JdbcExecutor extends SqlSltTestExecutor {
   protected final String username;
   protected final String password;
 
+  /**
+   * URL for connecting to the databse.
+   */
   public final String dbUrl;
   protected @Nullable Connection connection;
 
-  // In SLT all data received from the database is converted to strings.
+  /**
+   * A row produced by a query execution.
+   */
   static class Row {
+    /**
+     * In SLT all data received from the database is converted to strings.
+     */
     public final List<String> values;
 
     Row() {
@@ -88,10 +100,16 @@ public abstract class JdbcExecutor extends SqlSltTestExecutor {
       return String.join("\n", Utilities.map(this.allRows, Row::toString));
     }
 
+    /**
+     * @return Number of rows.
+     */
     public int size() {
       return this.allRows.size();
     }
 
+    /**
+     * Sort the rows using the specified sort order.
+     */
     public void sort(SqlTestQueryOutputDescription.SortOrder order) {
       switch (order) {
       case NONE:
@@ -113,6 +131,13 @@ public abstract class JdbcExecutor extends SqlSltTestExecutor {
     }
   }
 
+  /**
+   * Create an executor that uses JDBC to run tests.
+   * @param options  Execution options.
+   * @param dbUrl    URL for the database.
+   * @param username Name of database user.
+   * @param password Password of database user.
+   */
   public JdbcExecutor(ExecutionOptions options, String dbUrl, String username,
       String password) {
     super(options);
@@ -122,10 +147,16 @@ public abstract class JdbcExecutor extends SqlSltTestExecutor {
     this.connection = null;
   }
 
-  void statement(SltSqlStatement statement) throws SQLException {
+  /**
+   * Execute the specified statement.
+   * @param statement     SQL statement to execute.
+   */
+  public void statement(SltSqlStatement statement) throws SQLException {
     String stat = statement.statement;
+    // This "hack" should not be necessary, but some tests are wrong
+    // and fail on some databases.
     // Some tests drop views in the wrong order, e.g.,
-    // sqllogictest/test/index/view/1000/slt_good_0.test
+    // index/view/1000/slt_good_0.test
     if (stat.toLowerCase().startsWith("drop view")) {
       if (!stat.toLowerCase().contains("if exists")) {
         stat = stat.substring(0, 9) + " IF EXISTS " + stat.substring(10);
@@ -173,7 +204,7 @@ public abstract class JdbcExecutor extends SqlSltTestExecutor {
         boolean result =
             this.validate(query, resultSet, query.outputDescription,
                 statistics);
-        options.message(statistics.testsRun() + ": " + query.getQuery(), 2);
+        options.message(statistics.totalTests() + ": " + query.getQuery(), 2);
         return result;
       }
     }
@@ -257,7 +288,7 @@ public abstract class JdbcExecutor extends SqlSltTestExecutor {
    * Returns 'true' if execution has to stop due to a validation failure.
    */
   @SuppressWarnings("java:S4790")  // MD5 checksum
-  boolean validate(SqlTestQuery query, ResultSet rs,
+  public boolean validate(SqlTestQuery query, ResultSet rs,
       SqlTestQueryOutputDescription description,
       TestStatistics statistics)
       throws SQLException, NoSuchAlgorithmException {
@@ -318,7 +349,7 @@ public abstract class JdbcExecutor extends SqlSltTestExecutor {
    */
   abstract List<String> getViewList() throws SQLException;
 
-  void dropAllTables() throws SQLException {
+  public void dropAllTables() throws SQLException {
     assert this.connection != null;
     List<String> tables = this.getTableList();
     for (String tableName : tables) {
@@ -333,7 +364,7 @@ public abstract class JdbcExecutor extends SqlSltTestExecutor {
     }
   }
 
-  void dropAllViews() throws SQLException {
+  public void dropAllViews() throws SQLException {
     assert this.connection != null;
     List<String> tables = this.getViewList();
     for (String tableName : tables) {
@@ -348,17 +379,29 @@ public abstract class JdbcExecutor extends SqlSltTestExecutor {
     }
   }
 
+  /**
+   * Establish a JDBC connection to the database.
+   */
   public void establishConnection() throws SQLException {
     this.connection = DriverManager.getConnection(
         this.dbUrl, this.username, this.password);
     assert this.connection != null;
   }
 
+  /**
+   * Close the connection to the databse.
+   */
   public void closeConnection() throws SQLException {
     assert this.connection != null;
     this.connection.close();
   }
 
+  /**
+   * Execute all the test in the specified file using this database.
+   * @param file    File with tests.
+   * @param options Options guiding the execution.
+   * @return        The statistics describing the tests executed.
+   */
   @Override public TestStatistics execute(SltTestFile file,
       ExecutionOptions options)
       throws SQLException, NoSuchAlgorithmException {
@@ -373,7 +416,7 @@ public abstract class JdbcExecutor extends SqlSltTestExecutor {
           this.statement(stat);
         } catch (SQLException ex) {
           options.err.println("Error while processing #"
-              + (result.testsRun() + 1) + " " + operation);
+              + (result.totalTests() + 1) + " " + operation);
           throw ex;
         }
       } else {
