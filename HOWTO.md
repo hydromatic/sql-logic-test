@@ -28,13 +28,17 @@ Here's some miscellaneous documentation about using and developing SQL Logic Tes
 
 # Release
 
+Create an issue with summary "`Release sql-logic-test version x.y`"
+([example](https://github.com/hydromatic/sql-logic-test/issues/15)).
+
 Make sure that `./mvnw clean install site` runs on JDK 8, 11 and 17
 on Linux, macOS and Windows.
 Also check [GitHub Actions](https://github.com/hydromatic/sql-logic-test/actions?query=branch%3Amain).
 
 Update the [release history](HISTORY.md),
 the version number at the bottom of [README](README.md),
-and the copyright date in [NOTICE](NOTICE).
+and the copyright date in [NOTICE](NOTICE);
+commit these changes as `Release x.y`.
 
 Use JDK 11.
 
@@ -54,4 +58,13 @@ log in, close the repository, and release.
 
 Make sure that the [site](http://www.hydromatic.net/sql-logic-test/) has been updated.
 
-[Announce the release](https://twitter.com/julianhyde/status/622842100736856064).
+Mark the issue fixed, referencing the release commit (whichever commit
+had the message "`[maven-release-plugin] prepare release sql-logic-test-x.y`").
+
+[Announce the release](https://twitter.com/julianhyde/status/1652409133180817408).
+
+Convert the `sql-logic-test-x.y` tag into a
+[GitHub release](https://github.com/hydromatic/sql-logic-test/tags)
+named "`x.y`".
+
+Amend and commit `HOWTO.md` and `HISTORY.md`, if necessary.
