@@ -37,8 +37,7 @@ import java.nio.file.Paths;
  * Execute all SqlLogicTest tests.
  */
 public class Main {
-  private Main() {
-  }
+  private Main() {}
 
   public static void main(String[] argv) throws IOException {
     execute(true, System.out, System.err, argv);
@@ -50,9 +49,9 @@ public class Main {
       String... argv) throws IOException {
     ExecutionOptions options = new ExecutionOptions(exit, out, err);
     options.setBinaryName("slt");
-    NoExecutor.Factory.INSTANCE.register(options);
-    HsqldbExecutor.Factory.INSTANCE.register(options);
-    PostgresExecutor.Factory.INSTANCE.register(options);
+    NoExecutor.register(options);
+    HsqldbExecutor.register(options);
+    PostgresExecutor.register(options);
     int parse = options.parse(argv);
     if (parse != 0) {
       return parse;

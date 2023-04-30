@@ -32,12 +32,24 @@ import java.sql.SQLException;
 /**
  * Base class that must be derived from to implement new test executors
  * for SQL Logic Test.
+ *
+ * <p>An Executor should implement a static method with signature
+ *
+ * <pre>{@code
+ * public static void register(ExecutionOptions options)
+ * }</pre>
+ *
+ * <p>which can be used to register new command-line options
+ * (using {@link ExecutionOptions#registerOption})
+ * and to create an executor at runtime
+ * (using {@link ExecutionOptions#registerExecutor}).
  */
 public abstract class SqlSltTestExecutor extends SqlTestExecutor {
   protected final ExecutionOptions options;
 
   /**
    * Create a new test executor.
+   *
    * @param options  Options that will guide the execution.
    */
   public SqlSltTestExecutor(ExecutionOptions options) {

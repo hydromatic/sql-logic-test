@@ -42,28 +42,21 @@ public class HsqldbExecutor extends JdbcExecutor {
    */
   private static final AtomicLong HSQLDB_CONNECTION_ID = new AtomicLong(0);
 
-  public static class Factory extends ExecutorFactory {
-    public static final HsqldbExecutor.Factory INSTANCE =
-        new HsqldbExecutor.Factory();
-
-    private Factory() {}
-
-    /**
-     * Register the HSQL DB executor with the command-line options.
-     * @param options  Options that will guide the execution.
-     */
-    @Override public void register(ExecutionOptions options) {
-      options.registerExecutor("hsql", () -> {
-        HsqldbExecutor result = new HsqldbExecutor(options);
-        try {
-          Set<String> bugs = options.readBugsFile();
-          result.avoid(bugs);
-          return result;
-        } catch (IOException e) {
-          throw new RuntimeException(e);
-        }
-      });
-    }
+  /**
+   * Register the HSQL DB executor with the command-line options.
+   * @param options  Options that will guide the execution.
+   */
+  public static void register(ExecutionOptions options) {
+    options.registerExecutor("hsql", () -> {
+      HsqldbExecutor result = new HsqldbExecutor(options);
+      try {
+        Set<String> bugs = options.readBugsFile();
+        result.avoid(bugs);
+        return result;
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+    });
   }
 
   /**
