@@ -50,9 +50,9 @@ public class Main {
       String... argv) throws IOException {
     ExecutionOptions options = new ExecutionOptions(exit, out, err);
     options.setBinaryName("slt");
-    NoExecutor.Factory.INSTANCE.register(options);
-    HsqldbExecutor.Factory.INSTANCE.register(options);
-    PostgresExecutor.Factory.INSTANCE.register(options);
+    NoExecutor.FACTORY.register(options);
+    HsqldbExecutor.FACTORY.register(options);
+    PostgresExecutor.FACTORY.register(options);
     int parse = options.parse(argv);
     if (parse != 0) {
       return parse;

@@ -36,12 +36,12 @@ import java.util.Set;
  * A test executor that uses Postgres through JDBC.
  */
 public class PostgresExecutor extends JdbcExecutor {
+  public static final PostgresExecutor.Factory FACTORY =
+          new PostgresExecutor.Factory();
+
   public static class Factory extends ExecutorFactory {
     String username = "";
     String password = "";
-
-    public static final PostgresExecutor.Factory INSTANCE =
-        new PostgresExecutor.Factory();
 
     private Factory() {}
 

@@ -35,8 +35,9 @@ public class NoExecutor extends SqlSltTestExecutor {
     super(options);
   }
 
+  public static final NoExecutor.Factory FACTORY = new NoExecutor.Factory();
+
   public static class Factory extends ExecutorFactory {
-    public static final Factory INSTANCE = new Factory();
     private Factory() {}
 
     /**

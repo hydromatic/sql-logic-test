@@ -43,11 +43,10 @@ public class HsqldbExecutor extends JdbcExecutor {
    * connection).
    */
   private static final AtomicLong HSQLDB_CONNECTION_ID = new AtomicLong(0);
+  public static final HsqldbExecutor.Factory FACTORY =
+          new HsqldbExecutor.Factory();
 
   public static class Factory extends ExecutorFactory {
-    public static final HsqldbExecutor.Factory INSTANCE =
-        new HsqldbExecutor.Factory();
-
     private Factory() {}
 
     /**
