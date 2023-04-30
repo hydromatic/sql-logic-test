@@ -32,7 +32,7 @@ import java.sql.SQLException;
 public abstract class SqlSltTestExecutor extends SqlTestExecutor {
   protected final ExecutionOptions options;
 
-  SqlSltTestExecutor(ExecutionOptions options) {
+  public SqlSltTestExecutor(ExecutionOptions options) {
     this.options = options;
   }
 

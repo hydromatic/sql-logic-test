@@ -32,9 +32,9 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 
-class TestLoader extends SimpleFileVisitor<Path> {
-  int errors = 0;
-  final TestStatistics statistics;
+public class TestLoader extends SimpleFileVisitor<Path> {
+  public int errors = 0;
+  public final TestStatistics statistics;
   public final ExecutionOptions options;
 
   /**

@@ -122,10 +122,10 @@ public abstract class JdbcExecutor extends SqlSltTestExecutor {
     this.connection = null;
   }
 
-  void statement(SltSqlStatement statement) throws SQLException {
+  public void statement(SltSqlStatement statement) throws SQLException {
     String stat = statement.statement;
     // Some tests drop views in the wrong order, e.g.,
-    // sqllogictest/test/index/view/1000/slt_good_0.test
+    // index/view/1000/slt_good_0.test
     if (stat.toLowerCase().startsWith("drop view")) {
       if (!stat.toLowerCase().contains("if exists")) {
         stat = stat.substring(0, 9) + " IF EXISTS " + stat.substring(10);
@@ -257,7 +257,7 @@ public abstract class JdbcExecutor extends SqlSltTestExecutor {
    * Returns 'true' if execution has to stop due to a validation failure.
    */
   @SuppressWarnings("java:S4790")  // MD5 checksum
-  boolean validate(SqlTestQuery query, ResultSet rs,
+  public boolean validate(SqlTestQuery query, ResultSet rs,
       SqlTestQueryOutputDescription description,
       TestStatistics statistics)
       throws SQLException, NoSuchAlgorithmException {
@@ -318,7 +318,7 @@ public abstract class JdbcExecutor extends SqlSltTestExecutor {
    */
   abstract List<String> getViewList() throws SQLException;
 
-  void dropAllTables() throws SQLException {
+  public void dropAllTables() throws SQLException {
     assert this.connection != null;
     List<String> tables = this.getTableList();
     for (String tableName : tables) {
@@ -333,7 +333,7 @@ public abstract class JdbcExecutor extends SqlSltTestExecutor {
     }
   }
 
-  void dropAllViews() throws SQLException {
+  public void dropAllViews() throws SQLException {
     assert this.connection != null;
     List<String> tables = this.getViewList();
     for (String tableName : tables) {

@@ -99,7 +99,7 @@ public class ExecutionOptions {
     return bugs;
   }
 
-  void setBinaryName(String binaryName) {
+  public void setBinaryName(String binaryName) {
     this.binaryName = binaryName;
   }
 
@@ -276,7 +276,7 @@ public class ExecutionOptions {
    * Parse command-line arguments.
    * Returns 0 on success.
    */
-  int parse(String... argv) {
+  public int parse(String... argv) {
     if (argv.length == 0) {
       return this.abort("No arguments to process");
     }
