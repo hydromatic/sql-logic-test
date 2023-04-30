@@ -28,6 +28,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
+/**
+ * A class containing various useful static methods.
+ */
 public class Utilities {
   private Utilities() {}
 
@@ -38,6 +41,11 @@ public class Utilities {
     return "'" + other + "'";
   }
 
+  /**
+   * Extract the extension from a filename.
+   * @param filename  File name.
+   * @return  The file extension, or null if the name contains no dot (.).
+   */
   public static @Nullable String getFileExtension(String filename) {
     int i = filename.lastIndexOf('.');
     if (i > 0) {
@@ -48,6 +56,9 @@ public class Utilities {
 
   private static final char[] HEX_CODES = "0123456789abcdef".toCharArray();
 
+  /**
+   * Convert the data in the specified array to a hex string.
+   */
   public static String toHex(byte[] data) {
     StringBuilder r = new StringBuilder(data.length * 2);
     for (byte b : data) {
@@ -57,6 +68,12 @@ public class Utilities {
     return r.toString();
   }
 
+  /**
+   * Apply a function to every element in a list.
+   * @param data      List to apply function to.
+   * @param function  Function to apply.
+   * @return          A list with the result of the applications.
+   */
   public static <T, S> List<S> map(List<T> data, Function<T, S> function) {
     List<S> result = new ArrayList<>(data.size());
     for (T datum : data) {
@@ -65,6 +82,13 @@ public class Utilities {
     return result;
   }
 
+  /**
+   * Apply a function to every element in a list.
+   * The function is expected to return a list.
+   * Concatenate all the resulting lists.
+   * @param data     Input data.
+   * @param function Function to apply.
+   */
   public static <T, S> List<S> flatMap(List<T> data,
       Function<T, List<S>> function) {
     List<S> result = new ArrayList<>(data.size());

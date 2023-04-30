@@ -50,6 +50,10 @@ public class HsqldbExecutor extends JdbcExecutor {
 
     private Factory() {}
 
+    /**
+     * Register the HSQL DB executor with the command-line options.
+     * @param options  Options that will guide the execution.
+     */
     @Override public void register(ExecutionOptions options) {
       options.registerExecutor("hsql", () -> {
         HsqldbExecutor result = new HsqldbExecutor(options);
@@ -64,6 +68,10 @@ public class HsqldbExecutor extends JdbcExecutor {
     }
   }
 
+  /**
+   * Create a test executor that uses HSQL DB to execute tests.
+   * @param options Options guiding the test execution.
+   */
   public HsqldbExecutor(ExecutionOptions options) {
     super(options,
         "jdbc:hsqldb:mem:db" + HSQLDB_CONNECTION_ID.getAndIncrement(), "", "");

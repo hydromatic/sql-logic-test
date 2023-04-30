@@ -69,7 +69,7 @@ public class Main {
       Path path = Paths.get(r.getPath(), file);
       Files.walkFileTree(path, loader);
     }
-    out.println("Files that could not be not parsed: " + loader.errors);
+    out.println("Files that could not be not parsed: " + loader.fileParseErrors);
     loader.statistics.printStatistics(out);
     return 0;
   }

@@ -32,9 +32,24 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 
+/**
+ * A test loader is invoked for each test file.
+ * It parses the file into a set of tests
+ * and then executes the tests found in the file.
+ */
 public class TestLoader extends SimpleFileVisitor<Path> {
-  public int errors = 0;
+  /**
+   * Number of files that could not be parsed.
+   */
+  public int fileParseErrors = 0;
+  /**
+   * Statistics about the tests executed, including
+   * all errors found.
+   */
   public final TestStatistics statistics;
+  /**
+   * Options that guide the test execution.
+   */
   public final ExecutionOptions options;
 
   /**
@@ -46,6 +61,12 @@ public class TestLoader extends SimpleFileVisitor<Path> {
     this.options = options;
   }
 
+  /**
+   * Function executed for each test file.
+   * @param file   File to process.
+   * @param attrs  File attributes.
+   * @return       A decision whether the processing should continue or not.
+   */
   @Override public FileVisitResult visitFile(Path file,
       BasicFileAttributes attrs) {
     SqlSltTestExecutor executor = this.options.getExecutor();
@@ -62,7 +83,7 @@ public class TestLoader extends SimpleFileVisitor<Path> {
       } catch (Exception ex) {
         options.err.println("Error while executing test " + file + ": "
             + ex.getMessage());
-        this.errors++;
+        this.fileParseErrors++;
       }
       if (test != null) {
         try {

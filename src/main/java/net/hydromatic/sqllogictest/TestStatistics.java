@@ -31,13 +31,33 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Class that keeps track of the tests executed, including
+ * failures encountered.
+ */
 public class TestStatistics {
   static final DecimalFormat DF = new DecimalFormat("#,###");
 
+  /**
+   * Description of a test that failed.
+   * Only query tests are tracked; statements are not supposed to fail.
+   */
   public static class FailedTestDescription {
+    /**
+     * Query that caused the failure.
+     */
     public final SqlTestQuery query;
+    /**
+     * Description of the error encountered.
+     */
     public final String error;
+    /**
+     * If the test caused an exception it is stored here.
+     */
     public final @Nullable Throwable exception;
+    /**
+     * If true then store a verbose description of the exceptions.
+     */
     public final boolean verbose;
 
     public FailedTestDescription(SqlTestQuery query, String error,
@@ -66,26 +86,44 @@ public class TestStatistics {
   int passed;
   int ignored;
 
+  /**
+   * Increment the number of tests that have passed.
+   */
   public void incPassed() {
     this.passed++;
   }
 
+  /**
+   * Increment the number of tests that were ignored.
+   */
   public void incIgnored() {
     this.ignored++;
   }
 
+  /**
+   * Set the number of tests that have passed.
+   */
   public void setPassed(int n) {
     this.passed = n;
   }
 
+  /**
+   * Set the number of tests that have failed.
+   */
   public void setFailed(int n) {
     this.failed = n;
   }
 
+  /**
+   * Set the number of tests that were ignored.
+   */
   public void setIgnored(int n) {
     this.ignored = n;
   }
 
+  /**
+   * Add the other statistics to this.
+   */
   public void add(TestStatistics stats) {
     this.failed += stats.failed;
     this.passed += stats.passed;
@@ -93,14 +131,23 @@ public class TestStatistics {
     this.failures.addAll(stats.failures);
   }
 
+  /**
+   * @return The number of failed tests.
+   */
   public int getFailed() {
     return this.failed;
   }
 
+  /**
+   * @return The number of passed tests.
+   */
   public int getPassed() {
     return this.passed;
   }
 
+  /**
+   * @return The number of ignored tests.
+   */
   public int getIgnored() {
     return this.ignored;
   }
@@ -121,10 +168,16 @@ public class TestStatistics {
     return this.stopAtFirstErrror;
   }
 
-  public int testsRun() {
+  /**
+   * @return Total number of tests that were considered.
+   */
+  public int totalTests() {
     return this.passed + this.ignored + this.failed;
   }
 
+  /**
+   * Print the statistics to the specified stream.
+   */
   public void printStatistics(PrintStream out) {
     out.println("Passed: " + TestStatistics.DF.format(this.passed));
     out.println("Failed: " + TestStatistics.DF.format(this.failed));
@@ -136,9 +189,5 @@ public class TestStatistics {
     for (FailedTestDescription failure : this.failures) {
       out.println(failure.toString());
     }
-  }
-
-  public int totalTests() {
-    return this.failed + this.passed + this.ignored;
   }
 }

@@ -45,6 +45,12 @@ public class PostgresExecutor extends JdbcExecutor {
 
     private Factory() {}
 
+    /**
+     * Register the postgres-specific command-line options with the
+     * execution options.
+     * @param options  Options that parse the command-line and
+     *                 guide the execution.
+     */
     @Override public void register(ExecutionOptions options) {
       options.registerOption("-u", "username", "Postgres user name", o -> {
         this.username = o;

@@ -69,6 +69,12 @@ public class SltTestFile {
    * SQL language.
    */
   static class PostgresPolicy {
+    /**
+     * Function that decides whether a statement or query is executed at all.
+     * @param skip   List of conditions under which the stat/query is skipped.
+     * @param only   List of conditions under which the stat/query is executed.
+     * @return       True if the stat/query is executed.
+     */
     public boolean accept(List<String> skip, List<String> only) {
       if (only.contains("postgresql")) {
         return true;
@@ -83,7 +89,10 @@ public class SltTestFile {
   /**
    * Current line number in test file.
    */
-  private int lineno;
+  private int lineNo;
+  /**
+   * A file is parsed into a list of operations: statements or queries.
+   */
   public final List<ISqlTestOperation> fileContents;
   private final BufferedReader reader;
   // To support undo for reading
@@ -92,11 +101,14 @@ public class SltTestFile {
   private boolean done;
   private int testCount;
 
+  /**
+   * Create a test file from the file with the specified name.
+   */
   public SltTestFile(String testFile) throws IOException {
     File file = new File(testFile);
     this.reader = new BufferedReader(new FileReader(file));
     this.fileContents = new ArrayList<>();
-    this.lineno = 0;
+    this.lineNo = 0;
     this.testFile = testFile;
     this.done = false;
     this.testCount = 0;
@@ -104,7 +116,7 @@ public class SltTestFile {
 
   void error(String message) {
     throw new RuntimeException("File " + this.testFile
-        + "\nError at line " + this.lineno + ": " + message);
+        + "\nError at line " + this.lineNo + ": " + message);
   }
 
   private void undoRead(String line) {
@@ -120,7 +132,7 @@ public class SltTestFile {
       line = this.nextLine;
       this.nextLine = null;
     } else {
-      this.lineno++;
+      this.lineNo++;
       line = this.reader.readLine();
       if (!nullOk && line == null) {
         this.error("Test file ends prematurely");
@@ -203,7 +215,7 @@ public class SltTestFile {
     }
 
     String q = query.toString().trim();
-    result.setQuery(q, this.lineno);
+    result.setQuery(q, this.lineNo);
 
     final String vht = "values hashing to";
     if (!this.done) {
@@ -235,6 +247,10 @@ public class SltTestFile {
     return result;
   }
 
+  /**
+   * Parse the contents of the file.
+   * @param options      Options which guide the parsing.
+   */
   public void parse(ExecutionOptions options) throws IOException {
     PostgresPolicy policy = new PostgresPolicy();
 
@@ -302,6 +318,9 @@ public class SltTestFile {
     }
   }
 
+  /**
+   * Number of tests in the file.
+   */
   public int getTestCount() {
     return this.testCount;
   }

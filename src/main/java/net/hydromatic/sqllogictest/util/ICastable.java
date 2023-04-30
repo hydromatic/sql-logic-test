@@ -30,6 +30,12 @@ import java.io.PrintStream;
  * Utility interface providing some useful casting methods.
  */
 public interface ICastable {
+  /**
+   * Cast this object ot the specified type.
+   * @param clazz   Type to cast to.
+   * @return        An object of type T or null if the cast cannot be performed.
+   * @param <T>     Type of expected object.
+   */
   default <T> @Nullable T as(Class<T> clazz) {
     return ICastable.as(this, clazz, (String) null);
   }
@@ -42,10 +48,22 @@ public interface ICastable {
     }
   }
 
+  /**
+   * Print an error when a cast fails.
+   * @param err      Stream where error is printed.
+   * @param message  Message to print.
+   */
   default void error(PrintStream err, String message) {
     err.println(message);
   }
 
+  /**
+   * Cast this object ot the specified type.
+   * @param clazz   Type to cast to.
+   * @return        An object of type T or null if the cast cannot be performed.
+   * @param <T>     Type of expected object.* @param err
+   * @param failureMessage  Message to display if the cast fails.
+   */
   default <T> T as(PrintStream err, Class<T> clazz,
       @Nullable String failureMessage) {
     T result = this.as(clazz);
@@ -60,10 +78,24 @@ public interface ICastable {
     return result;
   }
 
+  /**
+   * Cast this object to the specified type.
+   * @param err    Stream where errors are displayed.
+   * @param clazz  Type to cast to.
+   * @return       A non-null object of the specified type.
+   * @param <T>    Type expected.
+   *           Throws when the cast cannot be performed.
+   */
   default <T> T to(PrintStream err, Class<T> clazz) {
     return this.as(err, clazz, (String) null);
   }
 
+  /**
+   * Check whether this object can be cast to the specified type.
+   * @param clazz  Type to cast to.
+   * @return       True if the cast can be performed.
+   * @param <T>    Type expected.
+   */
   default <T> boolean is(Class<T> clazz) {
     return this.as(clazz) != null;
   }

@@ -29,9 +29,17 @@ import net.hydromatic.sqllogictest.TestStatistics;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 
+/**
+ * Base class that must be derived from to implement new test executors
+ * for SQL Logic Test.
+ */
 public abstract class SqlSltTestExecutor extends SqlTestExecutor {
   protected final ExecutionOptions options;
 
+  /**
+   * Create a new test executor.
+   * @param options  Options that will guide the execution.
+   */
   public SqlSltTestExecutor(ExecutionOptions options) {
     this.options = options;
   }
