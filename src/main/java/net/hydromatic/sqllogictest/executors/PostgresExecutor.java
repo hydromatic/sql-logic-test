@@ -31,47 +31,41 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * A test executor that uses Postgres through JDBC.
  */
 public class PostgresExecutor extends JdbcExecutor {
-  public static final PostgresExecutor.Factory FACTORY =
-          new PostgresExecutor.Factory();
+  /**
+   * Register the postgres-specific command-line options with the
+   * execution options.
+   * @param options  Options that parse the command-line and
+   *                 guide the execution.
+   */
+  public static void register(ExecutionOptions options) {
+    AtomicReference<String> username = new AtomicReference<>();
+    AtomicReference<String> password = new AtomicReference<>();
 
-  public static class Factory extends ExecutorFactory {
-    String username = "";
-    String password = "";
-
-    private Factory() {}
-
-    /**
-     * Register the postgres-specific command-line options with the
-     * execution options.
-     * @param options  Options that parse the command-line and
-     *                 guide the execution.
-     */
-    @Override public void register(ExecutionOptions options) {
-      options.registerOption("-u", "username", "Postgres user name", o -> {
-        this.username = o;
-        return true;
-      });
-      options.registerOption("-p", "password", "Postgres password", o -> {
-        this.password = o;
-        return true;
-      });
-      options.registerExecutor("psql", () -> {
-        PostgresExecutor result = new PostgresExecutor(options,
-            this.username, this.password);
-        try {
-          Set<String> bugs = options.readBugsFile();
-          result.avoid(bugs);
-          return result;
-        } catch (IOException e) {
-          throw new RuntimeException(e);
-        }
-      });
-    }
+    options.registerOption("-u", "username", "Postgres user name", o -> {
+      username.set(o);
+      return true;
+    });
+    options.registerOption("-p", "password", "Postgres password", o -> {
+      password.set(o);
+      return true;
+    });
+    options.registerExecutor("psql", () -> {
+      PostgresExecutor result = new PostgresExecutor(
+              options, username.get(), password.get());
+      try {
+        Set<String> bugs = options.readBugsFile();
+        result.avoid(bugs);
+        return result;
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+    });
   }
 
   /**
