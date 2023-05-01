@@ -25,14 +25,12 @@ package net.hydromatic.sqllogictest.executors;
 import net.hydromatic.sqllogictest.ExecutionOptions;
 
 import java.io.IOException;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 /**
  * A test executor that uses HSQLDB through JDBC.
@@ -78,32 +76,11 @@ public class HsqldbExecutor extends JdbcExecutor {
   }
 
   @Override List<String> getTableList() throws SQLException {
-    List<String> result = new ArrayList<>();
-    assert this.connection != null;
-    DatabaseMetaData md = this.connection.getMetaData();
-    ResultSet rs = md.getTables(null, null, "%", new String[]{"TABLE"});
-    while (rs.next()) {
-      String tableName = rs.getString(3);
-      if (tableName.equals("PUBLIC")) {
-        // The catalog table in HSQLDB
-        continue;
-      }
-      result.add(tableName);
-    }
-    rs.close();
-    return result;
-  }
-
-  @Override List<String> getViewList() throws SQLException {
-    List<String> result = new ArrayList<>();
-    assert this.connection != null;
-    DatabaseMetaData md = this.connection.getMetaData();
-    ResultSet rs = md.getTables(null, null, "%", new String[]{"VIEW"});
-    while (rs.next()) {
-      String tableName = rs.getString(3);
-      result.add(tableName);
-    }
-    rs.close();
+    List<String> result = super.getTableList();
+    // Remove the "PUBLIC" table, which is the HSQLDB catalog
+    result = result.stream()
+            .filter(e -> !e.equals("PUBLIC"))
+            .collect(Collectors.toList());
     return result;
   }
 
