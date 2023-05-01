@@ -81,14 +81,16 @@ public class SqlLogicTestTest {
   @Disabled("Running this test requires a Postgres database named SLT with "
       + "appropriate users and permissions")
   void runPsql() throws IOException {
-    Output res =
-        launchSqlLogicTest("-e", "psql", "-v",
+    // Some queries use a unary + for a VARCHAR value
+    // triggering errors from PSQL.
+    Output res = launchSqlLogicTest("-e", "psql",
             "-u", "postgres", "-p", "password",
             "/index/random/1000/slt_good_0.test");
-    assertThat(res.err, is(""));
-    assertThat(res.out,
-        is("ExecutionOptions{tests=[], execute=true, "
-            + "executor=calcite, stopAtFirstError=false}\n"));
+    String[] outLines = res.out.split("\n");
+    assertThat(res.out, outLines.length, is(155));
+    assertThat(res.out, outLines[1], is("Passed: 980"));
+    assertThat(res.out, outLines[2], is("Failed: 30"));
+    assertThat(res.out, outLines[3], is("Ignored: 0"));
   }
 
   /** Test that runs all scripts with no executor. */

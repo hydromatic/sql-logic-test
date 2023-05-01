@@ -36,6 +36,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLDataException;
@@ -342,12 +343,34 @@ public abstract class JdbcExecutor extends SqlSltTestExecutor {
   /**
    * Returns a list of all tables in the database.
    */
-  abstract List<String> getTableList() throws SQLException;
+  List<String> getTableList() throws SQLException {
+    List<String> result = new ArrayList<>();
+    assert this.connection != null;
+    DatabaseMetaData md = this.connection.getMetaData();
+    ResultSet rs = md.getTables(null, null, "%", new String[]{"TABLE"});
+    while (rs.next()) {
+      String tableName = rs.getString(3);
+      result.add(tableName);
+    }
+    rs.close();
+    return result;
+  }
 
   /**
    * Returns a list of all views in the database.
    */
-  abstract List<String> getViewList() throws SQLException;
+  List<String> getViewList() throws SQLException {
+    List<String> result = new ArrayList<>();
+    assert this.connection != null;
+    DatabaseMetaData md = this.connection.getMetaData();
+    ResultSet rs = md.getTables(null, null, "%", new String[]{"VIEW"});
+    while (rs.next()) {
+      String tableName = rs.getString(3);
+      result.add(tableName);
+    }
+    rs.close();
+    return result;
+  }
 
   public void dropAllTables() throws SQLException {
     assert this.connection != null;
