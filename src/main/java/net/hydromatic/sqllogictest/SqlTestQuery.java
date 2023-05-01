@@ -22,8 +22,6 @@
  */
 package net.hydromatic.sqllogictest;
 
-import net.hydromatic.sqllogictest.executors.ISqlTestOperation;
-
 /**
  * Represents a query in a test.
  */

@@ -56,7 +56,7 @@ public class TestLoader extends SimpleFileVisitor<Path> {
    * Creates a new class that reads tests from a directory tree and
    * executes them.
    */
-  TestLoader(ExecutionOptions options) {
+  public TestLoader(ExecutionOptions options) {
     this.statistics = new TestStatistics(options.stopAtFirstError);
     this.options = options;
   }

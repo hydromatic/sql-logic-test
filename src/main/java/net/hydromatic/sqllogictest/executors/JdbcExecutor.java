@@ -23,6 +23,7 @@
 package net.hydromatic.sqllogictest.executors;
 
 import net.hydromatic.sqllogictest.ExecutionOptions;
+import net.hydromatic.sqllogictest.ISqlTestOperation;
 import net.hydromatic.sqllogictest.SltSqlStatement;
 import net.hydromatic.sqllogictest.SltTestFile;
 import net.hydromatic.sqllogictest.SqlTestQuery;
@@ -448,6 +449,8 @@ public abstract class JdbcExecutor extends SqlSltTestExecutor {
         try {
           stop = this.query(query, result);
         } catch (SQLException ex) {
+          options.message("Error while processing "
+                  + query.getQuery() + " " + ex.getMessage(), 1);
           stop = result.addFailure(
               new TestStatistics.FailedTestDescription(query,
                   ex.getMessage(), ex, options.verbosity > 0));
