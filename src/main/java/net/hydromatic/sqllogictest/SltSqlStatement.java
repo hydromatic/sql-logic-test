@@ -22,8 +22,6 @@
  */
 package net.hydromatic.sqllogictest;
 
-import net.hydromatic.sqllogictest.executors.ISqlTestOperation;
-
 /**
  * Encapsulates a DDL statement from a test file.
  */

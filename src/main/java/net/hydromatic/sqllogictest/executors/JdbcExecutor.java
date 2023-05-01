@@ -23,6 +23,7 @@
 package net.hydromatic.sqllogictest.executors;
 
 import net.hydromatic.sqllogictest.ExecutionOptions;
+import net.hydromatic.sqllogictest.ISqlTestOperation;
 import net.hydromatic.sqllogictest.SltSqlStatement;
 import net.hydromatic.sqllogictest.SltTestFile;
 import net.hydromatic.sqllogictest.SqlTestQuery;
