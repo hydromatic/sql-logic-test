@@ -449,6 +449,8 @@ public abstract class JdbcExecutor extends SqlSltTestExecutor {
         try {
           stop = this.query(query, result);
         } catch (SQLException ex) {
+          options.message("Error while processing "
+                  + query.getQuery() + " " + ex.getMessage(), 1);
           stop = result.addFailure(
               new TestStatistics.FailedTestDescription(query,
                   ex.getMessage(), ex, options.verbosity > 0));
