@@ -144,7 +144,7 @@ Get sql-logic-Test from
 <dependency>
   <groupId>net.hydromatic</groupId>
   <artifactId>sql-logic-test</artifactId>
-  <version>0.1</version>
+  <version>0.2</version>
 </dependency>
 ```
 
