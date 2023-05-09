@@ -78,11 +78,12 @@ public class TestLoader extends SimpleFileVisitor<Path> {
       SltTestFile test = null;
       try {
         options.message("Running " + file, 1);
-        test = new SltTestFile(file.toString());
+        test = new SltTestFile(file);
         test.parse(options);
       } catch (Exception ex) {
-        options.err.println("Error while executing test " + file + ": "
-            + ex.getMessage());
+        String errMsg = "Error while executing test " + file + ": "
+                + ex.getMessage();
+        options.err.println(errMsg);
         this.fileParseErrors++;
       }
       if (test != null) {

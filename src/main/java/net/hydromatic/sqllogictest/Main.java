@@ -27,11 +27,14 @@ import net.hydromatic.sqllogictest.executors.NoExecutor;
 import net.hydromatic.sqllogictest.executors.PostgresExecutor;
 
 import java.io.IOException;
-import java.io.PrintStream;
+import java.net.URI;
 import java.net.URL;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Execute all SqlLogicTest tests.
@@ -40,14 +43,19 @@ public class Main {
   private Main() {}
 
   public static void main(String[] argv) throws IOException {
-    execute(true, System.out, System.err, argv);
+    ExecutionOptions options = new ExecutionOptions(
+            true, System.out, System.err);
+    execute(options, argv);
   }
 
-  /** As {@link #main} but does not call {@link System#exit} if {@code exit}
-   * is false. */
-  public static int execute(boolean exit, PrintStream out, PrintStream err,
-      String... argv) throws IOException {
-    ExecutionOptions options = new ExecutionOptions(exit, out, err);
+  /**
+   * Execute the program using the specified execution options and arguments.
+   * @param options  Execution options to use.
+   * @param argv     Arguments to use.
+   * @return         0 on success, non-zero on error.
+   */
+  public static int execute(
+          ExecutionOptions options, String... argv) throws IOException {
     options.setBinaryName("slt");
     NoExecutor.register(options);
     HsqldbExecutor.register(options);
@@ -57,19 +65,27 @@ public class Main {
       return parse;
     }
 
-    URL r = Thread.currentThread().getContextClassLoader().getResource("test");
-    if (r == null) {
-      out.println("Cannot find resources");
+    URL jar = Main.class.getResource("Main.class");
+    if (jar == null) {
+      options.err.println("Cannot find resources");
       return 1;
     }
+    int end = jar.toString().lastIndexOf('!');
+    String jarFileLoc = jar.toString().substring(0, end);
+    URI uri = URI.create(jarFileLoc);
 
-    TestLoader loader = new TestLoader(options);
-    for (String file : options.getDirectories()) {
-      Path path = Paths.get(r.getPath(), file);
-      Files.walkFileTree(path, loader);
+    Map<String, String> zipProperties = new HashMap<>();
+    try (FileSystem zipfs = FileSystems.newFileSystem(uri, zipProperties)) {
+      TestLoader loader = new TestLoader(options);
+      for (String file : options.getDirectories()) {
+        Path root = zipfs.getPath("/");
+        Path path = root.resolve("test").resolve(file);
+        Files.walkFileTree(path, loader);
+      }
+      options.out.println("Files that could not be not parsed: "
+              + loader.fileParseErrors);
+      loader.statistics.printStatistics(options.out);
     }
-    out.println("Files that could not be not parsed: " + loader.fileParseErrors);
-    loader.statistics.printStatistics(out);
     return 0;
   }
 }

@@ -45,6 +45,8 @@ if [ "$cygwin" ]; then
   CP=$(cygpath -wp "$CP")
 fi
 
-exec java $VM_OPTS -cp "${CP}" net.hydromatic.sqllogictest.Main "$@"
+#exec java $VM_OPTS -cp "${CP}" net.hydromatic.sqllogictest.Main "$@"
+# TODO: how to programmatically get the jar name?
+exec java -classpath target/sql-logic-test-0.2-SNAPSHOT.jar net.hydromatic.sqllogictest.Main "$@"
 
 # End slt
