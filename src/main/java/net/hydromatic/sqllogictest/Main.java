@@ -33,6 +33,7 @@ import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -65,27 +66,41 @@ public class Main {
       return parse;
     }
 
+    TestLoader loader = new TestLoader(options);
     URL jar = Main.class.getResource("Main.class");
     if (jar == null) {
       options.err.println("Cannot find resources");
       return 1;
     }
-    int end = jar.toString().lastIndexOf('!');
-    String jarFileLoc = jar.toString().substring(0, end);
-    URI uri = URI.create(jarFileLoc);
 
-    Map<String, String> zipProperties = new HashMap<>();
-    try (FileSystem zipfs = FileSystems.newFileSystem(uri, zipProperties)) {
-      TestLoader loader = new TestLoader(options);
+    if (jar.toString().startsWith("jar:")) {
+      int end = jar.toString().lastIndexOf('!');
+      String jarFileLoc = jar.toString().substring(0, end);
+      URI uri = URI.create(jarFileLoc);
+
+      Map<String, String> zipProperties = new HashMap<>();
+      try (FileSystem zipfs = FileSystems.newFileSystem(uri, zipProperties)) {
+        for (String file : options.getDirectories()) {
+          Path root = zipfs.getPath("/");
+          Path path = root.resolve("test").resolve(file);
+          Files.walkFileTree(path, loader);
+        }
+      }
+    } else {
+      URL r = Thread.currentThread().getContextClassLoader().getResource("test");
+      if (r == null) {
+        options.err.println("Cannot find resources");
+        return 1;
+      }
       for (String file : options.getDirectories()) {
-        Path root = zipfs.getPath("/");
-        Path path = root.resolve("test").resolve(file);
+        Path path = Paths.get(r.getPath(), file);
         Files.walkFileTree(path, loader);
       }
-      options.out.println("Files that could not be not parsed: "
-              + loader.fileParseErrors);
-      loader.statistics.printStatistics(options.out);
     }
+
+    options.out.println("Files that could not be not parsed: "
+            + loader.fileParseErrors);
+    loader.statistics.printStatistics(options.out);
     return 0;
   }
 }
