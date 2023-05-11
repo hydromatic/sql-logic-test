@@ -23,12 +23,7 @@
 package net.hydromatic.sqllogictest;
 
 import net.hydromatic.sqllogictest.executors.SqlSltTestExecutor;
-import net.hydromatic.sqllogictest.util.Utilities;
 
-import java.nio.file.FileVisitResult;
-import java.nio.file.Path;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 
@@ -37,7 +32,7 @@ import java.sql.SQLException;
  * It parses the file into a set of tests
  * and then executes the tests found in the file.
  */
-public class TestLoader extends SimpleFileVisitor<Path> {
+public class TestLoader {
   /**
    * Number of files that could not be parsed.
    */
@@ -64,44 +59,39 @@ public class TestLoader extends SimpleFileVisitor<Path> {
   /**
    * Function executed for each test file.
    * @param file   File to process.
-   * @param attrs  File attributes.
    * @return       A decision whether the processing should continue or not.
    */
-  @Override public FileVisitResult visitFile(Path file,
-      BasicFileAttributes attrs) {
+  public boolean visitFile(String file) {
     SqlSltTestExecutor executor = this.options.getExecutor();
     if (executor == null) {
-      return FileVisitResult.TERMINATE;
+      return false;
     }
-    String extension = Utilities.getFileExtension(file.toString());
-    if (attrs.isRegularFile() && extension != null && extension.equals("test")) {
-      SltTestFile test = null;
+    SltTestFile test = null;
+    try {
+      options.message("Running " + file, 1);
+      test = new SltTestFile(file);
+      test.parse(options);
+    } catch (Exception ex) {
+      options.err.println("Error while executing test " + file + ": "
+          + ex.getMessage());
+      this.fileParseErrors++;
+    }
+    if (test != null) {
       try {
-        options.message("Running " + file, 1);
-        test = new SltTestFile(file.toString());
-        test.parse(options);
-      } catch (Exception ex) {
-        options.err.println("Error while executing test " + file + ": "
-            + ex.getMessage());
-        this.fileParseErrors++;
-      }
-      if (test != null) {
-        try {
-          TestStatistics stats = executor.execute(test, options);
-          if (!stats.failures.isEmpty() && options.verbosity > 0) {
-            options.out.println(stats.failed + " failures");
-          }
-          this.statistics.add(stats);
-          if (this.statistics.stopAtFirstErrror
-              && !this.statistics.failures.isEmpty()) {
-            return FileVisitResult.TERMINATE;
-          }
-        } catch (SQLException | NoSuchAlgorithmException ex) {
-          // Can't add exceptions to the overridden method visitFile
-          throw new IllegalArgumentException(ex);
+        TestStatistics stats = executor.execute(test, options);
+        if (!stats.failures.isEmpty() && options.verbosity > 0) {
+          options.out.println(stats.failed + " failures");
         }
+        this.statistics.add(stats);
+        if (this.statistics.stopAtFirstErrror
+            && !this.statistics.failures.isEmpty()) {
+          return false;
+        }
+      } catch (SQLException | NoSuchAlgorithmException ex) {
+        // Can't add exceptions to the overridden method visitFile
+        throw new IllegalArgumentException(ex);
       }
     }
-    return FileVisitResult.CONTINUE;
+    return true;
   }
 }
