@@ -27,9 +27,9 @@ import net.hydromatic.sqllogictest.util.Utilities;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -104,8 +104,9 @@ public class SltTestFile {
    * Create a test file from the file with the specified name.
    */
   public SltTestFile(String testFile) throws IOException {
-    File file = new File(testFile);
-    this.reader = new BufferedReader(new FileReader(file));
+    ClassLoader clLoader = Thread.currentThread().getContextClassLoader();
+    InputStream is = clLoader.getResourceAsStream(testFile);
+    this.reader = new BufferedReader(new InputStreamReader(is));
     this.fileContents = new ArrayList<>();
     this.lineNo = 0;
     this.testFile = testFile;

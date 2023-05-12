@@ -26,12 +26,12 @@ import net.hydromatic.sqllogictest.executors.HsqldbExecutor;
 import net.hydromatic.sqllogictest.executors.NoExecutor;
 import net.hydromatic.sqllogictest.executors.PostgresExecutor;
 
+import org.reflections.Reflections;
+import org.reflections.scanners.Scanners;
+
 import java.io.IOException;
 import java.io.PrintStream;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.util.Set;
 
 /**
  * Execute all SqlLogicTest tests.
@@ -57,16 +57,18 @@ public class Main {
       return parse;
     }
 
-    URL r = Thread.currentThread().getContextClassLoader().getResource("test");
-    if (r == null) {
-      out.println("Cannot find resources");
-      return 1;
-    }
-
+    Set<String> allTests =
+        new Reflections("test", Scanners.Resources).getResources(".*\\.test");
     TestLoader loader = new TestLoader(options);
-    for (String file : options.getDirectories()) {
-      Path path = Paths.get(r.getPath(), file);
-      Files.walkFileTree(path, loader);
+    for (String testPath : allTests) {
+      boolean runTest =
+          options.getDirectories().stream().anyMatch(testPath::contains);
+      if (!runTest) {
+        continue;
+      }
+      if (!loader.visitFile(testPath)) {
+        break;
+      }
     }
     out.println("Files that could not be not parsed: " + loader.fileParseErrors);
     loader.statistics.printStatistics(out);

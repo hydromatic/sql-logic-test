@@ -132,7 +132,7 @@ public class ExecutionOptions {
    */
   public List<String> getDirectories() {
     if (this.directories.isEmpty()) {
-      this.directories.add(".");  // This means "everything"
+      this.directories.add("test");  // This means "everything"
     }
     return this.directories;
   }
