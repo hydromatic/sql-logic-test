@@ -448,7 +448,8 @@ public abstract class JdbcExecutor extends SqlSltTestExecutor {
         boolean stop;
         try {
           stop = this.query(query, result);
-        } catch (SQLException ex) {
+        } catch (Throwable ex) {
+          // Need to catch Throwable to handle assertion failures too
           options.message("Error while processing "
                   + query.getQuery() + " " + ex.getMessage(), 1);
           stop = result.addFailure(

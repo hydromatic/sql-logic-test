@@ -40,14 +40,15 @@ public class Main {
   private Main() {}
 
   public static void main(String[] argv) throws IOException {
-    execute(true, System.out, System.err, argv);
+    ExecutionOptions options = new ExecutionOptions(
+            true, System.out, System.err);
+    execute(options, argv);
   }
 
-  /** As {@link #main} but does not call {@link System#exit} if {@code exit}
-   * is false. */
-  public static int execute(boolean exit, PrintStream out, PrintStream err,
-      String... argv) throws IOException {
-    ExecutionOptions options = new ExecutionOptions(exit, out, err);
+  /** Execute the program using the specified command-line options. */
+  public static int execute(
+          ExecutionOptions options,
+          String... argv) throws IOException {
     options.setBinaryName("slt");
     NoExecutor.register(options);
     HsqldbExecutor.register(options);
@@ -70,8 +71,8 @@ public class Main {
         break;
       }
     }
-    out.println("Files that could not be not parsed: " + loader.fileParseErrors);
-    loader.statistics.printStatistics(out);
+    options.out.println("Files that could not be not parsed: " + loader.fileParseErrors);
+    loader.statistics.printStatistics(options.out);
     return 0;
   }
 }
