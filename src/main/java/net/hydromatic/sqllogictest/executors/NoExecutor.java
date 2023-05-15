@@ -22,7 +22,7 @@
  */
 package net.hydromatic.sqllogictest.executors;
 
-import net.hydromatic.sqllogictest.ExecutionOptions;
+import net.hydromatic.sqllogictest.OptionsParser;
 import net.hydromatic.sqllogictest.SltTestFile;
 import net.hydromatic.sqllogictest.TestStatistics;
 
@@ -31,7 +31,7 @@ import net.hydromatic.sqllogictest.TestStatistics;
  * It is still useful to validate that the test parsing works.
  */
 public class NoExecutor extends SqlSltTestExecutor {
-  NoExecutor(ExecutionOptions options) {
+  NoExecutor(OptionsParser.SuppliedOptions options) {
     super(options);
   }
 
@@ -39,12 +39,13 @@ public class NoExecutor extends SqlSltTestExecutor {
    * Register the NoExecutor with the execution options.
    * It can be specified using the "-e none" option.
    */
-  public static void register(ExecutionOptions execOptions) {
-    execOptions.registerExecutor("none", () -> new NoExecutor(execOptions));
+  public static void register(OptionsParser execOptions) {
+    execOptions.registerExecutor("none",
+        () -> new NoExecutor(execOptions.getOptions()));
   }
 
   @Override public TestStatistics execute(SltTestFile testFile,
-      ExecutionOptions options) {
+      OptionsParser.SuppliedOptions options) {
     TestStatistics result = new TestStatistics(options.stopAtFirstError);
     this.startTest();
     result.setFailed(0);

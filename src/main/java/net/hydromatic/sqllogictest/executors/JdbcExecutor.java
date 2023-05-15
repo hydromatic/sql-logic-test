@@ -22,8 +22,8 @@
  */
 package net.hydromatic.sqllogictest.executors;
 
-import net.hydromatic.sqllogictest.ExecutionOptions;
 import net.hydromatic.sqllogictest.ISqlTestOperation;
+import net.hydromatic.sqllogictest.OptionsParser;
 import net.hydromatic.sqllogictest.SltSqlStatement;
 import net.hydromatic.sqllogictest.SltTestFile;
 import net.hydromatic.sqllogictest.SqlTestQuery;
@@ -135,13 +135,14 @@ public abstract class JdbcExecutor extends SqlSltTestExecutor {
 
   /**
    * Create an executor that uses JDBC to run tests.
+   *
    * @param options  Execution options.
    * @param dbUrl    URL for the database.
    * @param username Name of database user.
    * @param password Password of database user.
    */
-  public JdbcExecutor(ExecutionOptions options, String dbUrl, String username,
-      String password) {
+  public JdbcExecutor(OptionsParser.SuppliedOptions options, String dbUrl,
+      String username, String password) {
     super(options);
     this.dbUrl = dbUrl;
     this.username = username;
@@ -187,6 +188,7 @@ public abstract class JdbcExecutor extends SqlSltTestExecutor {
 
   /**
    * Run a query.
+   *
    * @param query       Query to execute.
    * @param statistics  Execution statistics recording the result of
    *                    the query execution.
@@ -427,7 +429,7 @@ public abstract class JdbcExecutor extends SqlSltTestExecutor {
    * @return        The statistics describing the tests executed.
    */
   @Override public TestStatistics execute(SltTestFile file,
-      ExecutionOptions options)
+      OptionsParser.SuppliedOptions options)
       throws SQLException, NoSuchAlgorithmException {
     this.startTest();
     this.establishConnection();
@@ -448,9 +450,10 @@ public abstract class JdbcExecutor extends SqlSltTestExecutor {
         boolean stop;
         try {
           stop = this.query(query, result);
-        } catch (SQLException ex) {
+        } catch (Throwable ex) {
+          // Need to catch Throwable to handle assertion failures too
           options.message("Error while processing "
-                  + query.getQuery() + " " + ex.getMessage(), 1);
+              + query.getQuery() + " " + ex.getMessage(), 1);
           stop = result.addFailure(
               new TestStatistics.FailedTestDescription(query,
                   ex.getMessage(), ex, options.verbosity > 0));

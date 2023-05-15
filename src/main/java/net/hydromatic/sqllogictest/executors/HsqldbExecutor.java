@@ -22,7 +22,7 @@
  */
 package net.hydromatic.sqllogictest.executors;
 
-import net.hydromatic.sqllogictest.ExecutionOptions;
+import net.hydromatic.sqllogictest.OptionsParser;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -44,13 +44,14 @@ public class HsqldbExecutor extends JdbcExecutor {
 
   /**
    * Register the HSQL DB executor with the command-line options.
-   * @param options  Options that will guide the execution.
+   *
+   * @param optionsParser  Options that will guide the execution.
    */
-  public static void register(ExecutionOptions options) {
-    options.registerExecutor("hsql", () -> {
-      HsqldbExecutor result = new HsqldbExecutor(options);
+  public static void register(OptionsParser optionsParser) {
+    optionsParser.registerExecutor("hsql", () -> {
+      HsqldbExecutor result = new HsqldbExecutor(optionsParser.getOptions());
       try {
-        Set<String> bugs = options.readBugsFile();
+        Set<String> bugs = optionsParser.getOptions().readBugsFile();
         result.avoid(bugs);
         return result;
       } catch (IOException e) {
@@ -63,7 +64,7 @@ public class HsqldbExecutor extends JdbcExecutor {
    * Create a test executor that uses HSQL DB to execute tests.
    * @param options Options guiding the test execution.
    */
-  public HsqldbExecutor(ExecutionOptions options) {
+  public HsqldbExecutor(OptionsParser.SuppliedOptions options) {
     super(options,
         "jdbc:hsqldb:mem:db" + HSQLDB_CONNECTION_ID.getAndIncrement(), "", "");
   }

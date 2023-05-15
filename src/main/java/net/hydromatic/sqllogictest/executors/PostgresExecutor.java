@@ -22,7 +22,7 @@
  */
 package net.hydromatic.sqllogictest.executors;
 
-import net.hydromatic.sqllogictest.ExecutionOptions;
+import net.hydromatic.sqllogictest.OptionsParser;
 
 import java.io.IOException;
 import java.sql.ResultSet;
@@ -40,26 +40,28 @@ public class PostgresExecutor extends JdbcExecutor {
   /**
    * Register the postgres-specific command-line options with the
    * execution options.
-   * @param options  Options that parse the command-line and
+   *
+   * @param optionsParser  Options that parse the command-line and
    *                 guide the execution.
    */
-  public static void register(ExecutionOptions options) {
+  public static void register(OptionsParser optionsParser) {
     AtomicReference<String> username = new AtomicReference<>();
     AtomicReference<String> password = new AtomicReference<>();
 
-    options.registerOption("-u", "username", "Postgres user name", o -> {
+    optionsParser.registerOption("-u", "username", "Postgres user name", o -> {
       username.set(o);
       return true;
     });
-    options.registerOption("-p", "password", "Postgres password", o -> {
+    optionsParser.registerOption("-p", "password", "Postgres password", o -> {
       password.set(o);
       return true;
     });
-    options.registerExecutor("psql", () -> {
+    optionsParser.registerExecutor("psql", () -> {
       PostgresExecutor result =
-          new PostgresExecutor(options, username.get(), password.get());
+          new PostgresExecutor(optionsParser.getOptions(),
+              username.get(), password.get());
       try {
-        Set<String> bugs = options.readBugsFile();
+        Set<String> bugs = optionsParser.getOptions().readBugsFile();
         result.avoid(bugs);
         return result;
       } catch (IOException e) {
@@ -71,8 +73,8 @@ public class PostgresExecutor extends JdbcExecutor {
   /**
    * Note: this implementation requires the existence of a database named SLT
    */
-  public PostgresExecutor(ExecutionOptions options, String username,
-      String password) {
+  public PostgresExecutor(OptionsParser.SuppliedOptions options,
+      String username, String password) {
     super(options, "jdbc:postgresql://localhost/slt", username, password);
   }
 

@@ -30,7 +30,6 @@ import org.reflections.Reflections;
 import org.reflections.scanners.Scanners;
 
 import java.io.IOException;
-import java.io.PrintStream;
 import java.util.Set;
 
 /**
@@ -39,22 +38,23 @@ import java.util.Set;
 public class Main {
   private Main() {}
 
-  public static void main(String[] argv) throws IOException {
-    execute(true, System.out, System.err, argv);
+  /** Command-line entry point. */
+  public static void main(String[] args) throws IOException {
+    OptionsParser optionParser =
+        new OptionsParser(true, System.out, System.err);
+    execute(optionParser, args);
   }
 
-  /** As {@link #main} but does not call {@link System#exit} if {@code exit}
-   * is false. */
-  public static int execute(boolean exit, PrintStream out, PrintStream err,
-      String... argv) throws IOException {
-    ExecutionOptions options = new ExecutionOptions(exit, out, err);
-    options.setBinaryName("slt");
-    NoExecutor.register(options);
-    HsqldbExecutor.register(options);
-    PostgresExecutor.register(options);
-    int parse = options.parse(argv);
-    if (parse != 0) {
-      return parse;
+  /** Execute the program using the specified command-line options. */
+  public static int execute(OptionsParser optionParser,
+      String... args) throws IOException {
+    optionParser.setBinaryName("slt");
+    NoExecutor.register(optionParser);
+    HsqldbExecutor.register(optionParser);
+    PostgresExecutor.register(optionParser);
+    OptionsParser.SuppliedOptions options = optionParser.parse(args);
+    if (options.exitCode != 0) {
+      return options.exitCode;
     }
 
     Set<String> allTests =
@@ -70,8 +70,9 @@ public class Main {
         break;
       }
     }
-    out.println("Files that could not be not parsed: " + loader.fileParseErrors);
-    loader.statistics.printStatistics(out);
+    options.out.println("Files that could not be not parsed: "
+            + loader.fileParseErrors);
+    loader.statistics.printStatistics(options.out);
     return 0;
   }
 }
