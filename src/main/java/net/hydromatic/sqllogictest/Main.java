@@ -30,7 +30,6 @@ import org.reflections.Reflections;
 import org.reflections.scanners.Scanners;
 
 import java.io.IOException;
-import java.io.PrintStream;
 import java.util.Set;
 
 /**
@@ -71,7 +70,8 @@ public class Main {
         break;
       }
     }
-    options.out.println("Files that could not be not parsed: " + loader.fileParseErrors);
+    options.out.println("Files that could not be not parsed: "
+            + loader.fileParseErrors);
     loader.statistics.printStatistics(options.out);
     return 0;
   }
