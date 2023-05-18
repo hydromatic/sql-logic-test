@@ -45,13 +45,13 @@ public class TestLoader {
   /**
    * Options that guide the test execution.
    */
-  public final ExecutionOptions options;
+  public final OptionsParser.SuppliedOptions options;
 
   /**
    * Creates a new class that reads tests from a directory tree and
    * executes them.
    */
-  public TestLoader(ExecutionOptions options) {
+  public TestLoader(OptionsParser.SuppliedOptions options) {
     this.statistics = new TestStatistics(options.stopAtFirstError);
     this.options = options;
   }

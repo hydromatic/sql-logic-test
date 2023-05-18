@@ -171,8 +171,8 @@ public class SqlLogicTestTest {
         ByteArrayOutputStream berr = new ByteArrayOutputStream()) {
       final PrintStream out = new PrintStream(bout);
       final PrintStream err = new PrintStream(berr);
-      ExecutionOptions options = new ExecutionOptions(false, out, err);
-      Main.execute(options, args);
+      OptionsParser optionParser = new OptionsParser(false, out, err);
+      Main.execute(optionParser, args);
       out.flush();
       err.flush();
       return new Output(bout.toString(UTF_8), berr.toString(UTF_8));

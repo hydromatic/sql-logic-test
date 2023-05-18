@@ -22,7 +22,7 @@
  */
 package net.hydromatic.sqllogictest.executors;
 
-import net.hydromatic.sqllogictest.ExecutionOptions;
+import net.hydromatic.sqllogictest.OptionsParser;
 import net.hydromatic.sqllogictest.SltTestFile;
 import net.hydromatic.sqllogictest.TestStatistics;
 
@@ -36,23 +36,23 @@ import java.sql.SQLException;
  * <p>An Executor should implement a static method with signature
  *
  * <pre>{@code
- * public static void register(ExecutionOptions options)
+ * public static void register(ExecutionOptionsParser parserOptions)
  * }</pre>
  *
  * <p>which can be used to register new command-line options
- * (using {@link ExecutionOptions#registerOption})
+ * (using {@link OptionsParser#registerOption})
  * and to create an executor at runtime
- * (using {@link ExecutionOptions#registerExecutor}).
+ * (using {@link OptionsParser#registerExecutor}).
  */
 public abstract class SqlSltTestExecutor extends SqlTestExecutor {
-  protected final ExecutionOptions options;
+  protected final OptionsParser.SuppliedOptions options;
 
   /**
    * Create a new test executor.
    *
    * @param options  Options that will guide the execution.
    */
-  public SqlSltTestExecutor(ExecutionOptions options) {
+  public SqlSltTestExecutor(OptionsParser.SuppliedOptions options) {
     this.options = options;
   }
 
@@ -60,6 +60,6 @@ public abstract class SqlSltTestExecutor extends SqlTestExecutor {
    * Executes the specified test file.
    */
   public abstract TestStatistics execute(SltTestFile testFile,
-      ExecutionOptions options)
+      OptionsParser.SuppliedOptions options)
       throws SQLException, NoSuchAlgorithmException;
 }

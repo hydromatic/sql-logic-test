@@ -39,22 +39,22 @@ public class Main {
   private Main() {}
 
   public static void main(String[] argv) throws IOException {
-    ExecutionOptions options = new ExecutionOptions(
+    OptionsParser optionParser = new OptionsParser(
             true, System.out, System.err);
-    execute(options, argv);
+    execute(optionParser, argv);
   }
 
   /** Execute the program using the specified command-line options. */
   public static int execute(
-          ExecutionOptions options,
+          OptionsParser optionParser,
           String... argv) throws IOException {
-    options.setBinaryName("slt");
-    NoExecutor.register(options);
-    HsqldbExecutor.register(options);
-    PostgresExecutor.register(options);
-    int parse = options.parse(argv);
-    if (parse != 0) {
-      return parse;
+    optionParser.setBinaryName("slt");
+    NoExecutor.register(optionParser);
+    HsqldbExecutor.register(optionParser);
+    PostgresExecutor.register(optionParser);
+    OptionsParser.SuppliedOptions options = optionParser.parse(argv);
+    if (options.exitCode != 0) {
+      return options.exitCode;
     }
 
     Set<String> allTests =
