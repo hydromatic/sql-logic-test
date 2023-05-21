@@ -151,6 +151,14 @@ public abstract class JdbcExecutor extends SqlSltTestExecutor {
   }
 
   /**
+   * Get the connection.  Throws if the connection has not been established.
+   */
+  public Connection getConnection() {
+    assert this.connection != null;
+    return this.connection;
+  }
+
+  /**
    * Execute the specified statement.
    * @param statement     SQL statement to execute.
    */
@@ -169,13 +177,12 @@ public abstract class JdbcExecutor extends SqlSltTestExecutor {
       }
     }
     this.options.message(this.statementsExecuted + ": " + stat, 2);
-    assert this.connection != null;
     if (this.buggyOperations.contains(statement.statement)
         || this.options.doNotExecute) {
       options.message("Skipping " + statement.statement, 2);
       return;
     }
-    try (Statement stmt = this.connection.createStatement()) {
+    try (Statement stmt = this.getConnection().createStatement()) {
       stmt.execute(stat);
     } catch (SQLException ex) {
       options.error(ex);
@@ -196,14 +203,13 @@ public abstract class JdbcExecutor extends SqlSltTestExecutor {
    */
   boolean query(SqlTestQuery query, TestStatistics statistics)
       throws SQLException, NoSuchAlgorithmException {
-    assert this.connection != null;
     if (this.buggyOperations.contains(query.getQuery())
         || this.options.doNotExecute) {
       statistics.incIgnored();
       options.message("Skipping " + query.getQuery(), 2);
       return false;
     }
-    try (Statement stmt = this.connection.createStatement()) {
+    try (Statement stmt = this.getConnection().createStatement()) {
       try (ResultSet resultSet = stmt.executeQuery(query.getQuery())) {
         boolean result =
             this.validate(query, resultSet, query.outputDescription,
@@ -348,8 +354,7 @@ public abstract class JdbcExecutor extends SqlSltTestExecutor {
    */
   List<String> getTableList() throws SQLException {
     List<String> result = new ArrayList<>();
-    assert this.connection != null;
-    DatabaseMetaData md = this.connection.getMetaData();
+    DatabaseMetaData md = this.getConnection().getMetaData();
     ResultSet rs = md.getTables(null, null, "%", new String[]{"TABLE"});
     while (rs.next()) {
       String tableName = rs.getString(3);
@@ -364,8 +369,7 @@ public abstract class JdbcExecutor extends SqlSltTestExecutor {
    */
   List<String> getViewList() throws SQLException {
     List<String> result = new ArrayList<>();
-    assert this.connection != null;
-    DatabaseMetaData md = this.connection.getMetaData();
+    DatabaseMetaData md = this.getConnection().getMetaData();
     ResultSet rs = md.getTables(null, null, "%", new String[]{"VIEW"});
     while (rs.next()) {
       String tableName = rs.getString(3);
@@ -376,7 +380,6 @@ public abstract class JdbcExecutor extends SqlSltTestExecutor {
   }
 
   public void dropAllTables() throws SQLException {
-    assert this.connection != null;
     List<String> tables = this.getTableList();
     for (String tableName : tables) {
       // Unfortunately prepare statements cannot be parameterized in
@@ -384,14 +387,13 @@ public abstract class JdbcExecutor extends SqlSltTestExecutor {
       // nothing we can do but suppress the warning.
       String del = "DROP TABLE " + tableName + " CASCADE";
       options.message(del, 2);
-      try (Statement drop = this.connection.createStatement()) {
+      try (Statement drop = this.getConnection().createStatement()) {
         drop.execute(del);  // NOSONAR
       }
     }
   }
 
   public void dropAllViews() throws SQLException {
-    assert this.connection != null;
     List<String> tables = this.getViewList();
     for (String tableName : tables) {
       // Unfortunately prepare statements cannot be parameterized in
@@ -399,7 +401,7 @@ public abstract class JdbcExecutor extends SqlSltTestExecutor {
       // nothing we can do but suppress the warning.
       String del = "DROP VIEW IF EXISTS " + tableName + " CASCADE";
       options.message(del, 2);
-      try (Statement drop = this.connection.createStatement()) {
+      try (Statement drop = this.getConnection().createStatement()) {
         drop.execute(del);  // NOSONAR
       }
     }
@@ -418,8 +420,7 @@ public abstract class JdbcExecutor extends SqlSltTestExecutor {
    * Close the connection to the databse.
    */
   public void closeConnection() throws SQLException {
-    assert this.connection != null;
-    this.connection.close();
+    this.getConnection().close();
   }
 
   /**
