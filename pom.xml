@@ -30,7 +30,7 @@ SOFTWARE.
   </parent>
 
   <artifactId>sql-logic-test</artifactId>
-  <version>0.2-SNAPSHOT</version>
+  <version>0.2</version>
   <packaging>jar</packaging>
 
   <!-- More project information. -->
@@ -122,7 +122,7 @@ SOFTWARE.
     <connection>scm:git:git://github.com/hydromatic/sql-logic-test.git</connection>
     <developerConnection>scm:git:git@github.com:hydromatic/sql-logic-test.git</developerConnection>
     <url>https://github.com/hydromatic/sql-logic-test/tree/main</url>
-    <tag>HEAD</tag>
+    <tag>sql-logic-test-0.2</tag>
   </scm>
 
   <repositories>
