@@ -75,7 +75,9 @@ public class SqlTestQuery implements ISqlTestOperation {
     return this.query;
   }
 
-  public String getName() { return this.name; }
+  public String getName() {
+    return this.name;
+  }
 
   @Override public String toString() {
     return this.query + (this.name != null ? " " + this.name : "");
