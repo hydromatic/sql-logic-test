@@ -112,7 +112,7 @@ public class SqlLogicTestTest {
     Output res =
         launchSqlLogicTest("-e", "hsql", "-x",
             "random/select/slt_good_12.test");
-    String[] outLines = res.out.split("\n");
+    String[] outLines = res.out.split(System.lineSeparator());
     assertThat(res.err, is(""));
     assertThat(outLines.length, is(8));
     assertThat(res.out, outLines[1], is("Passed: 4"));
@@ -126,7 +126,7 @@ public class SqlLogicTestTest {
   @Test void testRunWithErrors() throws IOException {
     Output res =
         launchSqlLogicTest("-e", "hsql", "random/select/slt_good_12.test");
-    String[] outLines = res.out.split("\n");
+    String[] outLines = res.out.split(System.lineSeparator());
     assertThat(res.err, is(""));
     assertThat(outLines.length, is(4973));
     assertThat(res.out, outLines[1], is("Passed: 7,404"));
@@ -137,7 +137,7 @@ public class SqlLogicTestTest {
 
   @Test void testRunSingleTestFile() throws IOException {
     Output res = launchSqlLogicTest("-e", "hsql", "select1.test");
-    String[] outLines = res.out.split("\n");
+    String[] outLines = res.out.split(System.lineSeparator());
     assertThat(res.err, is(""));
     assertThat(outLines.length, is(4));
     assertThat(res.out, outLines[1], is("Passed: 1,000"));
@@ -147,7 +147,7 @@ public class SqlLogicTestTest {
 
   @Test void testRunSingleTestFileNFlag() throws IOException {
     Output res = launchSqlLogicTest("-e", "hsql", "-n", "select1.test");
-    String[] outLines = res.out.split("\n");
+    String[] outLines = res.out.split(System.lineSeparator());
     assertThat(res.err, is(""));
     assertThat(outLines.length, is(4));
     assertThat(res.out, outLines[1], is("Passed: 0"));
@@ -158,7 +158,7 @@ public class SqlLogicTestTest {
   @Test void testRunMultipleTestFiles() throws IOException {
     Output res =
         launchSqlLogicTest("-e", "hsql", "select1.test", "select2.test");
-    String[] outLines = res.out.split("\n");
+    String[] outLines = res.out.split(System.lineSeparator());
     assertThat(res.err, is(""));
     assertThat(res.out, outLines.length, is(4));
     assertThat(res.out, outLines[1], is("Passed: 2,000"));
