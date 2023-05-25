@@ -34,10 +34,6 @@ import java.sql.SQLException;
  */
 public class TestLoader {
   /**
-   * Number of files that could not be parsed.
-   */
-  public int fileParseErrors = 0;
-  /**
    * Statistics about the tests executed, including
    * all errors found.
    */
@@ -59,7 +55,7 @@ public class TestLoader {
   /**
    * Function executed for each test file.
    * @param file   File to process.
-   * @return       A decision whether the processing should continue or not.
+   * @return       A decision whether the Sprocessing should continue or not.
    */
   public boolean visitFile(String file) {
     SqlSltTestExecutor executor = this.options.getExecutor();
@@ -74,13 +70,13 @@ public class TestLoader {
     } catch (Exception ex) {
       options.err.println("Error while executing test " + file + ": "
           + ex.getMessage());
-      this.fileParseErrors++;
+      this.statistics.incFilesNotParsed();
     }
     if (test != null) {
       try {
         TestStatistics stats = executor.execute(test, options);
         if (!stats.failures.isEmpty() && options.verbosity > 0) {
-          options.out.println(stats.failed + " failures");
+          options.out.println(stats.getFailedTestCount() + " failures");
         }
         this.statistics.add(stats);
         if (this.statistics.stopAtFirstErrror

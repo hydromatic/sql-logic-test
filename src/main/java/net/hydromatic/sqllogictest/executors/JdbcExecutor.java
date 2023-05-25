@@ -436,14 +436,15 @@ public abstract class JdbcExecutor extends SqlSltTestExecutor {
     this.establishConnection();
     this.dropAllTables();
     TestStatistics result = new TestStatistics(options.stopAtFirstError);
+    result.incFiles();
     for (ISqlTestOperation operation : file.fileContents) {
       SltSqlStatement stat = operation.as(SltSqlStatement.class);
       if (stat != null) {
         try {
           this.statement(stat);
         } catch (SQLException ex) {
-          options.err.println("Error while processing #"
-              + (result.totalTests() + 1) + " " + operation);
+          options.err.println("Error '" + ex.getMessage()
+                  + "' in SQL statement " + operation);
           throw ex;
         }
       } else {
@@ -453,8 +454,8 @@ public abstract class JdbcExecutor extends SqlSltTestExecutor {
           stop = this.query(query, result);
         } catch (Throwable ex) {
           // Need to catch Throwable to handle assertion failures too
-          options.message("Error while processing "
-              + query.getQuery() + " " + ex.getMessage(), 1);
+          options.message("Exception '" + ex.getMessage() + "' for query '"
+              + query.getQuery() + "'", 1);
           stop = result.addFailure(
               new TestStatistics.FailedTestDescription(query,
                   ex.getMessage(), ex, options.verbosity > 0));

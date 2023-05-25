@@ -45,8 +45,33 @@ public class Main {
     execute(optionParser, args);
   }
 
-  /** Execute the program using the specified command-line options. */
-  public static int execute(OptionsParser optionParser,
+  /**
+   * Run all tests, printing diagnostics to the streams contained in
+   * OptionsParser.
+   * @param optionsParser  Parser that is used to parse the command-line
+   *                       options.
+   * @param args           Command-line options.
+   * @return               0 on success, non-zero on error.
+   */
+  public static int runAllTests(OptionsParser optionsParser, String... args)
+          throws IOException {
+    TestStatistics result = execute(optionsParser, args);
+    if (result == null) {
+      return 1;
+    }
+    result.printStatistics(optionsParser.options.out);
+    return result.getFailedTestCount();
+  }
+
+  /**
+   * Execute the program using the specified command-line options.
+   * @param optionParser  Parser that will be used to parse the command-line
+   *                      options.
+   * @param args          Command-line options.
+   * @return              A description of the outcome of the tests.  null when
+   *                      tests cannot even be started.
+   */
+  public static TestStatistics execute(OptionsParser optionParser,
       String... args) throws IOException {
     optionParser.setBinaryName("slt");
     NoExecutor.register(optionParser);
@@ -54,7 +79,7 @@ public class Main {
     PostgresExecutor.register(optionParser);
     OptionsParser.SuppliedOptions options = optionParser.parse(args);
     if (options.exitCode != 0) {
-      return options.exitCode;
+      return null;
     }
 
     Set<String> allTests =
@@ -70,10 +95,7 @@ public class Main {
         break;
       }
     }
-    options.out.println("Files that could not be not parsed: "
-            + loader.fileParseErrors);
-    loader.statistics.printStatistics(options.out);
-    return 0;
+    return loader.statistics;
   }
 }
 

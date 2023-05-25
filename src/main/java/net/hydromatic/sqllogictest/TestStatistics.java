@@ -82,74 +82,97 @@ public class TestStatistics {
     }
   }
 
-  int failed;
-  int passed;
-  int ignored;
+  private int failedTestCount;
+  private int passedTestCount;
+  private int ignoredTestCount;
+  private int filesNotParsed;
+  private int testFiles;
+
+  public int getTestFileCount() {
+    return this.testFiles;
+  }
+
+  public int getParseFailureCount() {
+    return this.filesNotParsed;
+  }
+
+  public void incFilesNotParsed() {
+    this.filesNotParsed++;
+  }
+
+  /**
+   * Increment the number of files processed.
+   */
+  public void incFiles() {
+    this.testFiles++;
+  }
 
   /**
    * Increment the number of tests that have passed.
    */
   public void incPassed() {
-    this.passed++;
+    this.passedTestCount++;
   }
 
   /**
    * Increment the number of tests that were ignored.
    */
   public void incIgnored() {
-    this.ignored++;
+    this.ignoredTestCount++;
   }
 
   /**
    * Set the number of tests that have passed.
    */
-  public void setPassed(int n) {
-    this.passed = n;
+  public void setPassedTestCount(int n) {
+    this.passedTestCount = n;
   }
 
   /**
    * Set the number of tests that have failed.
    */
-  public void setFailed(int n) {
-    this.failed = n;
+  public void setFailedTestCount(int n) {
+    this.failedTestCount = n;
   }
 
   /**
    * Set the number of tests that were ignored.
    */
-  public void setIgnored(int n) {
-    this.ignored = n;
+  public void setIgnoredTestCount(int n) {
+    this.ignoredTestCount = n;
   }
 
   /**
    * Add the other statistics to this.
    */
   public void add(TestStatistics stats) {
-    this.failed += stats.failed;
-    this.passed += stats.passed;
-    this.ignored += stats.ignored;
+    this.failedTestCount += stats.failedTestCount;
+    this.passedTestCount += stats.passedTestCount;
+    this.ignoredTestCount += stats.ignoredTestCount;
+    this.filesNotParsed += stats.filesNotParsed;
+    this.testFiles += stats.testFiles;
     this.failures.addAll(stats.failures);
   }
 
   /**
    * @return The number of failed tests.
    */
-  public int getFailed() {
-    return this.failed;
+  public int getFailedTestCount() {
+    return this.failedTestCount;
   }
 
   /**
    * @return The number of passed tests.
    */
-  public int getPassed() {
-    return this.passed;
+  public int getPassedTestCount() {
+    return this.passedTestCount;
   }
 
   /**
    * @return The number of ignored tests.
    */
-  public int getIgnored() {
-    return this.ignored;
+  public int getIgnoredTestCount() {
+    return this.ignoredTestCount;
   }
 
   final List<FailedTestDescription> failures = new ArrayList<>();
@@ -164,7 +187,7 @@ public class TestStatistics {
    */
   public boolean addFailure(FailedTestDescription failure) {
     this.failures.add(failure);
-    this.failed++;
+    this.failedTestCount++;
     return this.stopAtFirstErrror;
   }
 
@@ -172,20 +195,25 @@ public class TestStatistics {
    * @return Total number of tests that were considered.
    */
   public int totalTests() {
-    return this.passed + this.ignored + this.failed;
+    return this.passedTestCount + this.ignoredTestCount + this.failedTestCount;
   }
 
   /**
    * Print the statistics to the specified stream.
    */
   public void printStatistics(PrintStream out) {
-    out.println("Passed: " + TestStatistics.DF.format(this.passed));
-    out.println("Failed: " + TestStatistics.DF.format(this.failed));
-    out.println("Ignored: " + TestStatistics.DF.format(this.ignored));
+    out.println("Total files processed: "
+            + TestStatistics.DF.format(this.testFiles));
+    out.println("Files not parsed: "
+            + TestStatistics.DF.format(this.filesNotParsed));
+    out.println("Passed: " + TestStatistics.DF.format(this.passedTestCount));
+    out.println("Failed: " + TestStatistics.DF.format(this.failedTestCount));
+    out.println("Ignored: " + TestStatistics.DF.format(this.ignoredTestCount));
     if (!this.failures.isEmpty()) {
       out.print(this.failures.size());
       out.println(" failures:");
     }
+
     for (FailedTestDescription failure : this.failures) {
       out.println(failure.toString());
     }

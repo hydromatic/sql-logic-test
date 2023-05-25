@@ -31,6 +31,8 @@ import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 
 /**
@@ -59,21 +61,31 @@ public class SqlLogicTestTest {
   private static final String UTF_8 = StandardCharsets.UTF_8.name();
 
   /** Test that prints usage information to stdout. */
-  @Test void testMain() throws IOException {
+  @Test void testHelp() throws IOException {
     Output res = launchSqlLogicTest("-h");
     assertThat(res.err, is(""));
     assertThat(res.out, is(USAGE));
   }
 
+  /** Test with unknown option. */
+  @Test void testUnknown() throws IOException {
+    Output res = launchSqlLogicTest("--unknown");
+    assertThat(res.err, is("Unknown option '--unknown'"
+            + System.lineSeparator()));
+    assertThat(res.out, is(USAGE));
+    assertThat(res.statistics, nullValue());
+  }
+
   /** Test that runs one script against HSQLDB. */
   @Test void testRunHsql() throws IOException {
     Output res = launchSqlLogicTest("-e", "hsql", "select1.test");
-    String[] outLines = res.out.split("\n");
+    assertThat(res.statistics, notNullValue());
+    assertThat(res.statistics.getTestFileCount(), is(1));
+    assertThat(res.statistics.getParseFailureCount(), is(0));
+    assertThat(res.statistics.getFailedTestCount(), is(0));
+    assertThat(res.statistics.getIgnoredTestCount(), is(0));
+    assertThat(res.statistics.getPassedTestCount(), is(1000));
     assertThat(res.err, is(""));
-    assertThat(res.out, outLines.length, is(4));
-    assertThat(res.out, outLines[1], is("Passed: 1,000"));
-    assertThat(res.out, outLines[2], is("Failed: 0"));
-    assertThat(res.out, outLines[3], is("Ignored: 0"));
   }
 
   /** Test that runs one script against Postgres. */
@@ -86,22 +98,23 @@ public class SqlLogicTestTest {
     Output res = launchSqlLogicTest("-e", "psql",
             "-u", "postgres", "-p", "password",
             "/index/random/1000/slt_good_0.test");
-    String[] outLines = res.out.split("\n");
-    assertThat(res.out, outLines.length, is(155));
-    assertThat(res.out, outLines[1], is("Passed: 980"));
-    assertThat(res.out, outLines[2], is("Failed: 30"));
-    assertThat(res.out, outLines[3], is("Ignored: 0"));
+    assertThat(res.statistics, notNullValue());
+    assertThat(res.statistics.getTestFileCount(), is(1));
+    assertThat(res.statistics.getParseFailureCount(), is(0));
+    assertThat(res.statistics.getFailedTestCount(), is(30));
+    assertThat(res.statistics.getIgnoredTestCount(), is(0));
+    assertThat(res.statistics.getPassedTestCount(), is(980));
   }
 
   /** Test that runs all scripts with no executor. */
   @Test void testRunNoExecutor() throws IOException {
     Output res = launchSqlLogicTest("-e", "none");
-    String[] outLines = res.out.split("\n");
-    assertThat(res.err, is(""));
-    assertThat(res.out, outLines.length, is(4));
-    assertThat(res.out, outLines[1], is("Passed: 0"));
-    assertThat(res.out, outLines[2], is("Failed: 0"));
-    assertThat(res.out, outLines[3], is("Ignored: 5,464,410"));
+    assertThat(res.statistics, notNullValue());
+    assertThat(res.statistics.getParseFailureCount(), is(0));
+    assertThat(res.statistics.getFailedTestCount(), is(0));
+    assertThat(res.statistics.getIgnoredTestCount(), is(5464410));
+    assertThat(res.statistics.getPassedTestCount(), is(0));
+    assertThat(res.statistics.getTestFileCount(), is(622));
   }
 
   /** Test that runs hsqldb on a file which produces errors and stops
@@ -114,56 +127,68 @@ public class SqlLogicTestTest {
             "random/select/slt_good_12.test");
     String[] outLines = res.out.split(System.lineSeparator());
     assertThat(res.err, is(""));
-    assertThat(outLines.length, is(8));
-    assertThat(res.out, outLines[1], is("Passed: 4"));
-    assertThat(res.out, outLines[2], is("Failed: 1"));
-    assertThat(res.out, outLines[3], is("Ignored: 0"));
-    assertThat(res.out, outLines[4], is("1 failures:"));
-    assertThat(res.out, outLines[5], is("ERROR: unexpected token: -"));
+    assertThat(outLines.length, is(9));
+    assertThat(res.out, outLines[1], is("Files not parsed: 0"));
+    assertThat(res.out, outLines[2], is("Passed: 4"));
+    assertThat(res.out, outLines[3], is("Failed: 1"));
+    assertThat(res.out, outLines[4], is("Ignored: 0"));
+    assertThat(res.out, outLines[5], is("1 failures:"));
+    assertThat(res.out, outLines[6], is("ERROR: unexpected token: -"));
+
+    assertThat(res.statistics, notNullValue());
+    assertThat(res.statistics.getParseFailureCount(), is(0));
+    assertThat(res.statistics.getFailedTestCount(), is(1));
+    assertThat(res.statistics.getIgnoredTestCount(), is(0));
+    assertThat(res.statistics.getPassedTestCount(), is(4));
+    assertThat(res.statistics.getTestFileCount(), is(1));
   }
 
   /** Test that runs hsqldb on a file which produces many errors. */
   @Test void testRunWithErrors() throws IOException {
     Output res =
         launchSqlLogicTest("-e", "hsql", "random/select/slt_good_12.test");
-    String[] outLines = res.out.split(System.lineSeparator());
     assertThat(res.err, is(""));
-    assertThat(outLines.length, is(4973));
-    assertThat(res.out, outLines[1], is("Passed: 7,404"));
-    assertThat(res.out, outLines[2], is("Failed: 1,656"));
-    assertThat(res.out, outLines[3], is("Ignored: 0"));
-    assertThat(res.out, outLines[4], is("1656 failures:"));
+    assertThat(res.statistics, notNullValue());
+    assertThat(res.statistics.getTestFileCount(), is(1));
+    assertThat(res.statistics.getParseFailureCount(), is(0));
+    assertThat(res.statistics.getFailedTestCount(), is(1656));
+    assertThat(res.statistics.getIgnoredTestCount(), is(0));
+    assertThat(res.statistics.getPassedTestCount(), is(7404));
   }
 
   @Test void testRunSingleTestFile() throws IOException {
     Output res = launchSqlLogicTest("-e", "hsql", "select1.test");
-    String[] outLines = res.out.split(System.lineSeparator());
     assertThat(res.err, is(""));
-    assertThat(outLines.length, is(4));
-    assertThat(res.out, outLines[1], is("Passed: 1,000"));
-    assertThat(res.out, outLines[2], is("Failed: 0"));
-    assertThat(res.out, outLines[3], is("Ignored: 0"));
+    assertThat(res.statistics, notNullValue());
+    assertThat(res.statistics.getTestFileCount(), is(1));
+    assertThat(res.statistics.getParseFailureCount(), is(0));
+    assertThat(res.statistics.getFailedTestCount(), is(0));
+    assertThat(res.statistics.getIgnoredTestCount(), is(0));
+    assertThat(res.statistics.getPassedTestCount(), is(1000));
   }
 
   @Test void testRunSingleTestFileNFlag() throws IOException {
     Output res = launchSqlLogicTest("-e", "hsql", "-n", "select1.test");
-    String[] outLines = res.out.split(System.lineSeparator());
     assertThat(res.err, is(""));
-    assertThat(outLines.length, is(4));
-    assertThat(res.out, outLines[1], is("Passed: 0"));
-    assertThat(res.out, outLines[2], is("Failed: 0"));
-    assertThat(res.out, outLines[3], is("Ignored: 1,000"));
+    assertThat(res.statistics, notNullValue());
+    assertThat(res.statistics.getTestFileCount(), is(1));
+    assertThat(res.statistics.getParseFailureCount(), is(0));
+    assertThat(res.statistics.getFailedTestCount(), is(0));
+    // Because of the -n flag
+    assertThat(res.statistics.getIgnoredTestCount(), is(1000));
+    assertThat(res.statistics.getPassedTestCount(), is(0));
   }
 
   @Test void testRunMultipleTestFiles() throws IOException {
     Output res =
         launchSqlLogicTest("-e", "hsql", "select1.test", "select2.test");
-    String[] outLines = res.out.split(System.lineSeparator());
     assertThat(res.err, is(""));
-    assertThat(res.out, outLines.length, is(4));
-    assertThat(res.out, outLines[1], is("Passed: 2,000"));
-    assertThat(res.out, outLines[2], is("Failed: 0"));
-    assertThat(res.out, outLines[3], is("Ignored: 0"));
+    assertThat(res.statistics, notNullValue());
+    assertThat(res.statistics.getTestFileCount(), is(2));
+    assertThat(res.statistics.getParseFailureCount(), is(0));
+    assertThat(res.statistics.getFailedTestCount(), is(0));
+    assertThat(res.statistics.getIgnoredTestCount(), is(0));
+    assertThat(res.statistics.getPassedTestCount(), is(2000));
   }
 
   private static Output launchSqlLogicTest(String... args) throws IOException {
@@ -172,20 +197,25 @@ public class SqlLogicTestTest {
       final PrintStream out = new PrintStream(bout);
       final PrintStream err = new PrintStream(berr);
       OptionsParser optionParser = new OptionsParser(false, out, err);
-      Main.execute(optionParser, args);
+      TestStatistics statistics = Main.execute(optionParser, args);
+      if (statistics != null) {
+        statistics.printStatistics(out);
+      }
       out.flush();
       err.flush();
-      return new Output(bout.toString(UTF_8), berr.toString(UTF_8));
+      return new Output(bout.toString(UTF_8), berr.toString(UTF_8), statistics);
     }
   }
 
   private static class Output {
     final String out;
     final String err;
+    final TestStatistics statistics;
 
-    Output(String out, String err) {
+    Output(String out, String err, TestStatistics statistics) {
       this.out = out;
       this.err = err;
+      this.statistics = statistics;
     }
   }
 }
