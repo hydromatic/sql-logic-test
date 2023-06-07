@@ -46,21 +46,10 @@ public class Main {
   }
 
   /**
-   * Run all tests, printing diagnostics to the streams contained in
-   * OptionsParser.
-   * @param optionsParser  Parser that is used to parse the command-line
-   *                       options.
-   * @param args           Command-line options.
-   * @return               0 on success, non-zero on error.
+   * Get the list of all test files.
    */
-  public static int runAllTests(OptionsParser optionsParser, String... args)
-          throws IOException {
-    TestStatistics result = execute(optionsParser, args);
-    if (result == null) {
-      return 1;
-    }
-    result.printStatistics(optionsParser.options.out);
-    return result.getFailedTestCount();
+  public static Set<String> getTestList() {
+    return new Reflections("test", Scanners.Resources).getResources(".*\\.test");
   }
 
   /**
@@ -82,8 +71,7 @@ public class Main {
       return null;
     }
 
-    Set<String> allTests =
-        new Reflections("test", Scanners.Resources).getResources(".*\\.test");
+    Set<String> allTests = getTestList();
     TestLoader loader = new TestLoader(options);
     for (String testPath : allTests) {
       boolean runTest =

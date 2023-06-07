@@ -50,7 +50,7 @@ public class TestStatistics {
     /**
      * Description of the error encountered.
      */
-    public final String error;
+    public final @Nullable String error;
     /**
      * If the test caused an exception it is stored here.
      */
@@ -60,7 +60,7 @@ public class TestStatistics {
      */
     public final boolean verbose;
 
-    public FailedTestDescription(SqlTestQuery query, String error,
+    public FailedTestDescription(SqlTestQuery query, @Nullable String error,
         @Nullable Throwable exception, boolean verbose) {
       this.query = query;
       this.error = error;
@@ -69,7 +69,7 @@ public class TestStatistics {
     }
 
     @Override public String toString() {
-      String result = "ERROR: " + this.error
+      String result = "ERROR: " + (this.error != null ? this.error : "")
               + System.lineSeparator() + "\t" + this.query.file
               + ":" + this.query.line
               + System.lineSeparator()  + "\t" + this.query;
