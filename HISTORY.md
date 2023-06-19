@@ -26,6 +26,22 @@ SOFTWARE.
 
 For a full list of releases, see <a href="https://github.com/hydromatic/sql-logic-test/releases">github</a>.
 
+## <a href="https://github.com/hydromatic/sql-logic-test/releases/tag/sql-logic-test-0.3">0.2</a> / 2023-06-20
+
+* API to expose the list of tests
+* `ParserOptions` can return an executor specified by name
+* `Main.execute` method returns `TestStatistics` instead of a status code
+* Printed error summaries take into account the verbosity
+  (indicated by the number of `-v` command-line flags)
+
+Upgrades
+
+* Bump `hsqldb` from 2.7.1 to 2.7.2
+* Bump `checkstyle` from 10.11.0 to 10.12.0
+* Bump `maven-source-plugin` from 3.2.1 to 3.3.0
+* Bump `maven-dependency-plugin` from 3.5.0 to 3.6.0
+* Bump `maven-checkstyle-plugin` from 3.2.2 to 3.3.0
+ 
 ## <a href="https://github.com/hydromatic/sql-logic-test/releases/tag/sql-logic-test-0.2">0.2</a> / 2023-05-20
 
 * Extensible options parsing

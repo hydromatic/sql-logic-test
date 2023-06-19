@@ -62,7 +62,7 @@ Options:
 -n            Do not execute, just parse the test files
 -e executor   Executor to use
 -b filename   Load a list of buggy commands to skip from this file
--v            Increase verbosity
+-v            Increase verbosity (can be repeated)
 -u username   Postgres user name
 -p password   Postgres password
 Registered executors:
@@ -91,6 +91,11 @@ of failures including an explanation for each failure.  A query can fail either
 because it triggers an internal database, or because it produces incorrect
 results.  All the queries have been validated with sqlite, so a failure
 is very likely to be a true bug in the tested engine.
+
+The verbosity flag `-v` controls both the logging messages printed while running 
+the tests, and the details about each encountered error, after the tests
+have completed.  The flag can be repeated to increase verbosity; meaninful
+values are between 0 and 2.
 
 ## Listing all available tests
 
@@ -144,7 +149,7 @@ Get sql-logic-Test from
 <dependency>
   <groupId>net.hydromatic</groupId>
   <artifactId>sql-logic-test</artifactId>
-  <version>0.2</version>
+  <version>0.3</version>
 </dependency>
 ```
 
