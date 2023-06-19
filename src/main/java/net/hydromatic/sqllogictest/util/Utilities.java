@@ -22,8 +22,6 @@
  */
 package net.hydromatic.sqllogictest.util;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
@@ -39,19 +37,6 @@ public class Utilities {
    */
   public static String singleQuote(String other) {
     return "'" + other + "'";
-  }
-
-  /**
-   * Extract the extension from a filename.
-   * @param filename  File name.
-   * @return  The file extension, or null if the name contains no dot (.).
-   */
-  public static @Nullable String getFileExtension(String filename) {
-    int i = filename.lastIndexOf('.');
-    if (i > 0) {
-      return filename.substring(i + 1);
-    }
-    return null;
   }
 
   private static final char[] HEX_CODES = "0123456789abcdef".toCharArray();

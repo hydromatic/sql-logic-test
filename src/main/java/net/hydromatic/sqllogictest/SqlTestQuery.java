@@ -58,6 +58,7 @@ public class SqlTestQuery implements ISqlTestOperation {
 
   SqlTestQuery(String file) {
     this.query = "";
+    this.name = null;
     this.file = file;
     this.outputDescription = new SqlTestQueryOutputDescription();
   }
@@ -74,7 +75,11 @@ public class SqlTestQuery implements ISqlTestOperation {
     return this.query;
   }
 
+  public String getName() {
+    return this.name;
+  }
+
   @Override public String toString() {
-    return this.query;
+    return this.query + (this.name != null ? " " + this.name : "");
   }
 }

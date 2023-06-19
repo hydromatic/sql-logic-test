@@ -223,18 +223,15 @@ public class OptionsParser {
     }
 
     /**
-     * Get the executor indicated by the command-line options.
+     * @return The executor associated with the specified name
+     * or null if there isn't any such executor.
      */
-    public @Nullable SqlSltTestExecutor getExecutor() {
-      if (this.executor == null || this.executor.isEmpty()) {
-        this.abort("Please supply an executor name using the -e flag");
-        return null;
-      }
+    public @Nullable SqlSltTestExecutor getExecutorByName(String executor) {
       Supplier<SqlSltTestExecutor> supplier =
-          this.executorFactories.get(this.executor);
+              this.executorFactories.get(executor);
       if (supplier == null) {
-        err.println("Executor for " + Utilities.singleQuote(this.executor)
-            + " not registered using 'registerExecutor");
+        err.println("Executor for " + Utilities.singleQuote(executor)
+                + " not registered using 'registerExecutor");
         err.println("Registered executors:");
         for (String s: this.executorFactories.keySet()) {
           err.println("\t" + s);
@@ -243,6 +240,17 @@ public class OptionsParser {
         return null;
       }
       return supplier.get();
+    }
+
+    /**
+     * Get the executor indicated by the command-line options.
+     */
+    public @Nullable SqlSltTestExecutor getExecutor() {
+      if (this.executor == null || this.executor.isEmpty()) {
+        this.abort("Please supply an executor name using the -e flag");
+        return null;
+      }
+      return this.getExecutorByName(this.executor);
     }
 
     void error(String message) {
@@ -312,7 +320,7 @@ public class OptionsParser {
     this.registerOption("-b", "filename",
         "Load a list of buggy commands to skip from this file",
         this.options::setBugsFile);
-    this.registerOption("-v", null, "Increase verbosity",
+    this.registerOption("-v", null, "Increase verbosity (can be repeated)",
         o -> {
           this.options.verbosity++;
           return true;

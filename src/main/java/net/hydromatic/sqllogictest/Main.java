@@ -45,8 +45,22 @@ public class Main {
     execute(optionParser, args);
   }
 
-  /** Execute the program using the specified command-line options. */
-  public static int execute(OptionsParser optionParser,
+  /**
+   * Get the list of all test files.
+   */
+  public static Set<String> getTestList() {
+    return new Reflections("test", Scanners.Resources).getResources(".*\\.test");
+  }
+
+  /**
+   * Execute the program using the specified command-line options.
+   * @param optionParser  Parser that will be used to parse the command-line
+   *                      options.
+   * @param args          Command-line options.
+   * @return              A description of the outcome of the tests.  null when
+   *                      tests cannot even be started.
+   */
+  public static TestStatistics execute(OptionsParser optionParser,
       String... args) throws IOException {
     optionParser.setBinaryName("slt");
     NoExecutor.register(optionParser);
@@ -54,11 +68,10 @@ public class Main {
     PostgresExecutor.register(optionParser);
     OptionsParser.SuppliedOptions options = optionParser.parse(args);
     if (options.exitCode != 0) {
-      return options.exitCode;
+      return null;
     }
 
-    Set<String> allTests =
-        new Reflections("test", Scanners.Resources).getResources(".*\\.test");
+    Set<String> allTests = getTestList();
     TestLoader loader = new TestLoader(options);
     for (String testPath : allTests) {
       boolean runTest =
@@ -70,10 +83,7 @@ public class Main {
         break;
       }
     }
-    options.out.println("Files that could not be not parsed: "
-            + loader.fileParseErrors);
-    loader.statistics.printStatistics(options.out);
-    return 0;
+    return loader.statistics;
   }
 }
 

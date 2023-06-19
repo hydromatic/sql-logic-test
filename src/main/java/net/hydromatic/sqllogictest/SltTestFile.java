@@ -32,6 +32,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Represents the data from a .test file from the
@@ -93,6 +94,7 @@ public class SltTestFile {
    * A file is parsed into a list of operations: statements or queries.
    */
   public final List<ISqlTestOperation> fileContents;
+  private final InputStream stream;
   private final BufferedReader reader;
   // To support undo for reading
   private @Nullable String nextLine;
@@ -105,8 +107,9 @@ public class SltTestFile {
    */
   public SltTestFile(String testFile) throws IOException {
     ClassLoader clLoader = Thread.currentThread().getContextClassLoader();
-    InputStream is = clLoader.getResourceAsStream(testFile);
-    this.reader = new BufferedReader(new InputStreamReader(is));
+    this.stream = clLoader.getResourceAsStream(testFile);
+    this.reader = new BufferedReader(new InputStreamReader(
+            Objects.requireNonNull(this.stream)));
     this.fileContents = new ArrayList<>();
     this.lineNo = 0;
     this.testFile = testFile;
@@ -309,6 +312,8 @@ public class SltTestFile {
         }
       }
     }
+    this.reader.close();
+    this.stream.close();
   }
 
   private void add(ISqlTestOperation operation,

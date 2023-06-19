@@ -46,11 +46,13 @@ public class NoExecutor extends SqlSltTestExecutor {
 
   @Override public TestStatistics execute(SltTestFile testFile,
       OptionsParser.SuppliedOptions options) {
-    TestStatistics result = new TestStatistics(options.stopAtFirstError);
+    TestStatistics result = new TestStatistics(
+            options.stopAtFirstError, options.verbosity);
+    result.incFiles();
     this.startTest();
-    result.setFailed(0);
-    result.setIgnored(testFile.getTestCount());
-    result.setPassed(0);
+    result.setFailedTestCount(0);
+    result.setIgnoredTestCount(testFile.getTestCount());
+    result.setPassedTestCount(0);
     options.message(this.elapsedTime(testFile.getTestCount()), 1);
     return result;
   }
