@@ -46,7 +46,8 @@ public class NoExecutor extends SqlSltTestExecutor {
 
   @Override public TestStatistics execute(SltTestFile testFile,
       OptionsParser.SuppliedOptions options) {
-    TestStatistics result = new TestStatistics(options.stopAtFirstError);
+    TestStatistics result = new TestStatistics(
+            options.stopAtFirstError, options.verbosity);
     result.incFiles();
     this.startTest();
     result.setFailedTestCount(0);

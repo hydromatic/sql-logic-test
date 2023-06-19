@@ -48,14 +48,15 @@ public class TestLoader {
    * executes them.
    */
   public TestLoader(OptionsParser.SuppliedOptions options) {
-    this.statistics = new TestStatistics(options.stopAtFirstError);
+    this.statistics = new TestStatistics(
+            options.stopAtFirstError, options.verbosity);
     this.options = options;
   }
 
   /**
    * Function executed for each test file.
    * @param file   File to process.
-   * @return       A decision whether the Sprocessing should continue or not.
+   * @return       A decision whether the processing should continue or not.
    */
   public boolean visitFile(String file) {
     SqlSltTestExecutor executor = this.options.getExecutor();

@@ -320,7 +320,7 @@ public class OptionsParser {
     this.registerOption("-b", "filename",
         "Load a list of buggy commands to skip from this file",
         this.options::setBugsFile);
-    this.registerOption("-v", null, "Increase verbosity",
+    this.registerOption("-v", null, "Increase verbosity (can be repeated)",
         o -> {
           this.options.verbosity++;
           return true;

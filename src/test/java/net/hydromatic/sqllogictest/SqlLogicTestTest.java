@@ -50,7 +50,7 @@ public class SqlLogicTestTest {
       + "-n            Do not execute, just parse the test files\n"
       + "-e executor   Executor to use\n"
       + "-b filename   Load a list of buggy commands to skip from this file\n"
-      + "-v            Increase verbosity\n"
+      + "-v            Increase verbosity (can be repeated)\n"
       + "-u username   Postgres user name\n"
       + "-p password   Postgres password\n"
       + "Registered executors:\n"

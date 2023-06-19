@@ -52,41 +52,83 @@ public class TestStatistics {
      */
     public final @Nullable String error;
     /**
+     * Detailed information about the error.
+     * Printed by toString() when verbosity is higher than 1.
+     */
+    public final String details;
+    /**
      * If the test caused an exception it is stored here.
      */
     public final @Nullable Throwable exception;
-    /**
-     * If true then store a verbose description of the exceptions.
-     */
-    public final boolean verbose;
 
+    /**
+     * Create a description of a failed test.
+     * @param query     Query executed that failed.
+     * @param error     Error encountered.
+     * @param details   Details about error; output by toString()
+     *                  when verbosity is greater than 1.
+     * @param exception Exception encountered while processing
+     *                  query, if any.  Null otherwise.
+     */
     public FailedTestDescription(SqlTestQuery query, @Nullable String error,
-        @Nullable Throwable exception, boolean verbose) {
+        String details,
+        @Nullable Throwable exception) {
       this.query = query;
+      if (error == null && exception != null) {
+        error = exception.getMessage();
+        if (error == null) {
+          error = "Exception " + exception.getClass().getSimpleName();
+        }
+      }
       this.error = error;
+      this.details = details;
       this.exception = exception;
-      this.verbose = verbose;
     }
 
-    @Override public String toString() {
+    public String toString(int verbosity) {
       String result = "ERROR: " + (this.error != null ? this.error : "")
-              + System.lineSeparator() + "\t" + this.query.file
+              + System.lineSeparator() + "\ttest: " + this.query.file
               + ":" + this.query.line
               + System.lineSeparator()  + "\t" + this.query;
-      if (this.exception != null && this.verbose) {
+      if (verbosity > 0) {
+        if (this.exception != null) {
+          StackTraceElement[] stackTrace = this.exception.getStackTrace();
+          if (stackTrace.length > 0) {
+            StackTraceElement el = stackTrace[0];
+            result += System.lineSeparator()
+                    + el.getFileName() + ":" + el.getLineNumber() + " "
+                    + el.getClassName() + "." + el.getMethodName();
+          }
+        }
+      }
+      if (this.exception != null && verbosity > 1) {
+        if (!this.details.isEmpty()) {
+          result += System.lineSeparator() + this.details;
+        }
         StringPrintStream str = new StringPrintStream();
         this.exception.printStackTrace(str.getPrintStream());
         result += System.lineSeparator() + str;
       }
       return result;
     }
+
+    @Override public String toString() {
+      return this.toString(1);
+    }
   }
 
   private int failedTestCount;
   private int passedTestCount;
   private int ignoredTestCount;
+  /**
+   * Test files that could not be parsed.
+   */
   private int filesNotParsed;
+  /**
+   * Files that were processed.
+   */
   private int testFiles;
+  private int verbosity;
 
   public int getTestFileCount() {
     return this.testFiles;
@@ -151,6 +193,7 @@ public class TestStatistics {
     this.ignoredTestCount += stats.ignoredTestCount;
     this.filesNotParsed += stats.filesNotParsed;
     this.testFiles += stats.testFiles;
+    this.verbosity = Math.max(this.verbosity, stats.verbosity);
     this.failures.addAll(stats.failures);
   }
 
@@ -178,8 +221,14 @@ public class TestStatistics {
   final List<FailedTestDescription> failures = new ArrayList<>();
   final boolean stopAtFirstErrror;
 
-  public TestStatistics(boolean stopAtFirstError) {
+  public TestStatistics(boolean stopAtFirstError, int verbosity) {
     this.stopAtFirstErrror = stopAtFirstError;
+    this.verbosity = verbosity;
+    this.failedTestCount = 0;
+    this.passedTestCount = 0;
+    this.ignoredTestCount = 0;
+    this.filesNotParsed = 0;
+    this.testFiles = 0;
   }
 
   /**
@@ -215,7 +264,7 @@ public class TestStatistics {
     }
 
     for (FailedTestDescription failure : this.failures) {
-      out.println(failure.toString());
+      out.println(failure.toString(this.verbosity));
     }
   }
 }

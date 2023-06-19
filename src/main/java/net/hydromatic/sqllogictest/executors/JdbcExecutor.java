@@ -80,7 +80,7 @@ public abstract class JdbcExecutor extends SqlSltTestExecutor {
     }
 
     @Override public String toString() {
-      return String.join("\n", this.values);
+      return String.join(System.lineSeparator(), this.values);
     }
   }
 
@@ -99,7 +99,8 @@ public abstract class JdbcExecutor extends SqlSltTestExecutor {
     }
 
     @Override public String toString() {
-      return String.join("\n", Utilities.map(this.allRows, Row::toString));
+      return String.join(System.lineSeparator(),
+              Utilities.map(this.allRows, Row::toString));
     }
 
     /**
@@ -160,7 +161,8 @@ public abstract class JdbcExecutor extends SqlSltTestExecutor {
 
   /**
    * Execute the specified statement.
-   * @param statement     SQL statement to execute.
+   * @param statement  SQL statement to execute.
+   *                   Throws when a statement fails although it should pass.
    */
   public void statement(SltSqlStatement statement) throws SQLException {
     String stat = statement.statement;
@@ -180,15 +182,14 @@ public abstract class JdbcExecutor extends SqlSltTestExecutor {
     if (this.buggyOperations.contains(statement.statement)
         || this.options.doNotExecute) {
       options.message("Skipping " + statement.statement, 2);
-      return;
     }
     try (Statement stmt = this.getConnection().createStatement()) {
       stmt.execute(stat);
     } catch (SQLException ex) {
-      options.error(ex);
-      // Failures during the execution of statements are fatal.
-      // Only failures in queries are handled.
-      throw ex;
+      if (statement.shouldPass) {
+        options.error(ex);
+        throw ex;
+      } // otherwise we can just ignore the exception
     }
     this.statementsExecuted++;
   }
@@ -314,35 +315,39 @@ public abstract class JdbcExecutor extends SqlSltTestExecutor {
           new TestStatistics.FailedTestDescription(query,
               "Expected " + description.getValueCount() + " rows, got "
                   + rows.size() * description.columnTypes.length(),
-              null, options.verbosity > 0));
+              "",
+              null));
     }
     rows.sort(description.getOrder());
     if (description.getQueryResults() != null) {
       String r = rows.toString();
-      String q = String.join("\n", description.getQueryResults());
+      String q = String.join(System.lineSeparator(),
+              description.getQueryResults());
       if (!r.equals(q)) {
         return statistics.addFailure(
             new TestStatistics.FailedTestDescription(query,
-                "Output differs: computed\n"
-                    + r
-                    + "\nExpected:\n"
-                    + q,
-                null, options.verbosity > 0));
+                "Output differs from expected value",
+          "computed" + System.lineSeparator()
+                    + r + System.lineSeparator()
+                    + "Expected:" + System.lineSeparator()
+                    + q + System.lineSeparator(),
+                null));
       }
     }
     if (description.hash != null) {
       // MD5 is considered insecure, but we have no choice because this is
       // the algorithm used to compute the checksums by SLT.
       MessageDigest md = MessageDigest.getInstance("MD5");
-      String repr = rows + "\n";
+      String repr = rows + System.lineSeparator();
       md.update(repr.getBytes(StandardCharsets.UTF_8));
       byte[] digest = md.digest();
       String hash = Utilities.toHex(digest);
       if (!description.hash.equals(hash)) {
         return statistics.addFailure(
             new TestStatistics.FailedTestDescription(query,
-                "Hash of data does not match expected value", null,
-                options.verbosity > 0));
+                "Hash of data does not match expected value",
+                    "expected:" + description.hash + " "
+                    + "computed: " + hash + System.lineSeparator(), null));
       }
     }
     statistics.incPassed();
@@ -431,21 +436,31 @@ public abstract class JdbcExecutor extends SqlSltTestExecutor {
    */
   @Override public TestStatistics execute(SltTestFile file,
       OptionsParser.SuppliedOptions options)
-      throws SQLException, NoSuchAlgorithmException {
+      throws SQLException {
     this.startTest();
     this.establishConnection();
     this.dropAllTables();
-    TestStatistics result = new TestStatistics(options.stopAtFirstError);
+    TestStatistics result = new TestStatistics(
+            options.stopAtFirstError, options.verbosity);
     result.incFiles();
     for (ISqlTestOperation operation : file.fileContents) {
       SltSqlStatement stat = operation.as(SltSqlStatement.class);
       if (stat != null) {
         try {
           this.statement(stat);
+          if (!stat.shouldPass) {
+            options.err.println("Statement should have failed: " + operation);
+          }
         } catch (SQLException ex) {
-          options.err.println("Error '" + ex.getMessage()
-                  + "' in SQL statement " + operation);
-          throw ex;
+          // errors in statements cannot be recovered.
+          if (stat.shouldPass) {
+            // shouldPass should always be true, otherwise
+            // the exception should not be thrown.
+            options.err.println("Error '" + ex.getMessage()
+                    + "' in SQL statement " + operation);
+            result.incFilesNotParsed();
+            return result;
+          }
         }
       } else {
         SqlTestQuery query = operation.to(options.err, SqlTestQuery.class);
@@ -454,11 +469,10 @@ public abstract class JdbcExecutor extends SqlSltTestExecutor {
           stop = this.query(query, result);
         } catch (Throwable ex) {
           // Need to catch Throwable to handle assertion failures too
-          options.message("Exception '" + ex.getMessage() + "' for query '"
-              + query.getQuery() + "'", 1);
+          options.message("Exception during query: " + ex.getMessage(), 1);
           stop = result.addFailure(
               new TestStatistics.FailedTestDescription(query,
-                  ex.getMessage(), ex, options.verbosity > 0));
+                  null, "", ex));
         }
         if (stop) {
           break;
