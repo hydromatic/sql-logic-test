@@ -41,6 +41,9 @@ Upgrades
 * Bump `maven-source-plugin` from 3.2.1 to 3.3.0
 * Bump `maven-dependency-plugin` from 3.5.0 to 3.6.0
 * Bump `maven-checkstyle-plugin` from 3.2.2 to 3.3.0
+* Bump `checker-qual` from 3.34.0 to 3.35.0
+* Bump `maven-surefire-plugin` from 3.1.0 to 3.1.2
+* Bump `maven-failsafe-plugin` from 3.1.0 to 3.1.2
  
 ## <a href="https://github.com/hydromatic/sql-logic-test/releases/tag/sql-logic-test-0.2">0.2</a> / 2023-05-20
 
