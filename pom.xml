@@ -88,7 +88,7 @@ SOFTWARE.
     <hamcrest.version>2.2</hamcrest.version>
     <hsqldb.version>2.7.2</hsqldb.version>
     <jcommander.version>1.82</jcommander.version>
-    <junit-jupiter.version>5.9.3</junit-jupiter.version>
+    <junit-jupiter.version>5.10.0</junit-jupiter.version>
     <maven-checkstyle-plugin.version>3.3.0</maven-checkstyle-plugin.version>
     <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
     <maven-dependency-plugin.version>3.6.0</maven-dependency-plugin.version>
