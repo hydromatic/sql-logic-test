@@ -83,7 +83,7 @@ SOFTWARE.
     <build-helper-maven-plugin.version>3.4.0</build-helper-maven-plugin.version>
     <checkerframework.version>3.35.0</checkerframework.version>
     <!-- We support checkstyle 9.3 and higher; 10.0 requires JDK 11 or higher. -->
-    <checkstyle.version>10.12.0</checkstyle.version>
+    <checkstyle.version>10.12.2</checkstyle.version>
     <git-commit-id-plugin.version>4.9.10</git-commit-id-plugin.version>
     <hamcrest.version>2.2</hamcrest.version>
     <hsqldb.version>2.7.2</hsqldb.version>
